@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OKAGIA</title>
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="OKAGIA - Premium Okada, Pragia, and Taxi Booking">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></s>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .dark-glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+        .tap-anim { transition: transform 0.1s; }
+        .tap-anim:active { transform: scale(0.95); }
+        #map { height: 300px; width: 100%; border-radius: 12px; z-index: 1; }
+        .hidden-view { display: none !important; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .okada-game { background: #1e293b; border-radius: 12px; }
+    </style>
+
+    <!-- PWA Manifest (Inline for simplicity) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"OKAGIA","short_name":"OKAGIA","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3097/3097180.png","sizes":"192x192","type":"image/png"}]}'>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <!-- ==================== LANDING PAGE ==================== -->
+    <div id="view-landing" class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 text-white">
+        <div id="logo-trigger" class="tap-anim cursor-pointer mb-8 text-center">
+            <i class="fa-solid fa-motorcycle text-6xl text-emerald-400 mb-2"></i>
+            <h1 class="text-5xl font-extrabold tracking-tighter">OKAGIA</h1>
+            <p class="text-slate-400 text-sm mt-1">Move Smart. Move Safe.</p>
+        </div>
+
+        <div class="w-full max-w-sm space-y-4">
+            <button onclick="showAuth('Passenger')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-500/30 tap-anim flex items-center justify-center gap-3">
+                <i class="fa-solid fa-user text-xl"></i> I'm a Passenger
+            </button>
+            <button onclick="showAuth('Driver')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg tap-anim flex items-center justify-center gap-3">
+                <i class="fa-solid fa-id-card text-xl"></i> I'm a Driver / Motorist
+            </button>
+        </div>
+
+        <button onclick="startGame()" class="mt-12 text-slate-500 text-xs flex items-center gap-2 hover:text-emerald-400 transition">
+            <i class="fa-solid fa-gamepad"></i> Play Okada Dodge
+        </button>
+
+        <!-- Hidden Admin Trigger Text -->
+        <p onclick="adminTap()" class="mt-16 text-[10px] text-slate-800 select-none cursor-default">v1.0.4 build</p>
+    </div>
+
+    <!-- ==================== AUTH PAGE ==================== -->
+    <div id="view-auth" class="hidden-view min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
+        <div class="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl">
+            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-slate-800">Login</h2>
+            
+            <div id="signup-fields" class="hidden space-y-4 mb-4">
+                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="tel" id="reg-phone" placeholder="Phone Number (e.g., 024XXXXXXX)" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                
+                <!-- Driver Specific Fields -->
+                <div id="driver-reg-fields" class="hidden space-y-4">
+                    <input type="text" id="reg-brand" placeholder="Brand Name (e.g., Kofi Express)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
+                    <select id="reg-vehicle" class="w-full p-3 border border-slate-200 rounded-xl outline-none bg-white">
+                        <option value="2 Tyres">2 Tyres (Okada)</option>
+                        <option value="3 Tyres">3 Tyres (Pragia/Aboboyaa)</option>
+                        <option value="4 Tyres">4 Tyres (Taxi)</option>
+                    </select>
+                    <input type="tel" id="reg-workphone" placeholder="Work Phone Number (for passengers to call)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
+                    <input type="url" id="reg-photo" placeholder="Photo URL (Paste link from ImgBB/Facebook)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
+                    <p class="text-xs text-slate-500">💡 Tip: Upload your photo to <a href="https://imgbb.com/" target="_blank" class="text-emerald-600 underline">imgbb.com</a> and paste the direct link here.</p>
+                    <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-800">
+                        <i class="fa-solid fa-circle-info mr-1"></i> Policy: You will be charged <b>0.50 GHS</b> (2/3 tyres) or <b>1.00 GHS</b> (4 tyres) <b>only</b> when you go Online AND accept at least one passenger.
+                   3</div>
+                </div>
+            </div>
+
+            <div class="space-y-4 mt-4">
+                <input type="text" id="login-name" placeholder="Your Name" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="tel" id="login-phone" placeholder="Phone Number (Your Password)" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+           0</div>
+
+            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl mt-6 tap-anim">Login</button>
+            <p id="auth-toggle" onclick="toggleAuthMode()" class="text-center text-sm text-slate-500 mt-4 cursor-pointer hover:text-emerald-600">New user? Sign Up</p>
+            <button onclick="showView('view-landing')" class="w-full text-center text-slate-400 text-sm mt-4">← Back</button>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP CONTAINER ==================== -->
+    <div id="view-app" class="hidden-view min-h-screen bg-slate-50 pb-20">
+        <!-- Header -->
+        <header class="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md">
+            <div class="flex justify-between items-center max-w-4xl mx-auto">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-motorcycle text-emerald-400 text-xl"></i>
+                    <span class="font-bold text-lg">OKAGIA</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="user-display-name" class="text-sm text-slate-300 hidden sm:block">User</span>
+                    <button onclick="logout()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Welcome Banner (Dynamic) -->
+        <div id="welcome-banner" class="bg-emerald-600 text-white p-4 text-center text-sm font-medium hidden">
+            <i class="fa-solid fa-bullhorn mr-2"></i> <span id="welcome-msg-text">Welcome to OKAGIA!</span>
+        </div>
+
+        <!-- PASSENGER DASHBOARD -->
+        <div id="dash-passenger" class="hidden-view max-w-4xl mx-auto p-4 space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-3">Find a Ride</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+                    <input type="text" id="p-search-landmark" placeholder="Your Landmark / Location" class="p-2 border rounded-lg text-sm">
+                    <select id="p-filter-type" class="p-2 border rounded-lg text-sm bg-white">
+                        <option value="">All Vehicles</option>
+                        <option value="2 Tyres">2 Tyres</option>
+                        <option value="3 Tyres">3 Tyres</option>
+                        <option value="4 Tyres">4 Tyres</option>
+                    </select>
+                    <button onclick="searchDrivers()" class="bg-slate-900 text-white rounded-lg text-sm font-bold tap-anim">Search Nearby</button>
+                </div>
+                <div class="flex items-center justify-between mt-2">
+                    <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                        <input type="checkbox" id="toggle-map" onchange="toggleMapView()" class="accent-emerald-600"> Show on Map
+                    </label>
+                    <span class="text-xs text-slate-400">Sorted by nearest distance</span>
+                </div>
+            </div>
+
+            <!-- Map Container (Hidden by default) -->
+            <div id="map-container" class="hidden-view mb-4">
+                <div id="map"></div>
+            </div>
+
+            <!-- Driver List -->
+            <div id="driver-list" class="space-y-3">
+                <p class="text-center text-slate-400 text-sm py-8">Search for a location to see available drivers.</p>
+            </div>
+        </div>
+
+        <!-- DRIVER DASHBOARD -->
+        <div id="dash-driver" class="hidden-view max-w-4xl mx-auto p-4 space-y-4">
+            <!-- Status & Wallet -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <p class="text-slate-500 text-sm mb-2">Your Status</p>
+                    <button id="driver-status-btn" onclick="toggleDriverStatus()" class="w-full py-3 rounded-xl font-bold text-lg tap-anim bg-slate-300 text-slate-600">
+                        GO ONLINE
+                    </button>
+                    <p id="driver-status-text" class="text-xs text-slate-400 mt-2">Currently Offline</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <p class="text-slate-500 text-sm mb-1">Amount Owed to OKAGIA</p>
+                    <h2 class="text-3xl font-extrabold text-red-500">GHS <span id="driver-owed">0.00</span></h2>
+                    <button onclick="showPaymentModal()" class="mt-3 text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold tap-anim">Submit Payment Proof</button>
+                </div>
+            </div>
+
+            <!-- Active Ride / Notifications -->
+            <div id="driver-ride-alert" class="hidden bg-amber-50 border-2 border-amber-400 p-4 rounded-2xl shadow-lg animate-pulse">
+                <h3 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-bell mr-2"></i>New Ride Request!</h3>
+                <p class="text-sm text-amber-900 mb-3">Passenger at: <b id="req-pickup">Unknown</b></p>
+                <div class="flex gap-2">
+                    <button onclick="handleRideResponse(true)" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold tap-anim">✅ Accept</button>
+                    <button onclick="handleRideResponse(false)" class="flex-1 bg-red-500 text-white py-2 rounded-lg font-bold tap-anim">❌ Refuse</button>
+                </div>
+            </div>
+
+            <!-- WhatsApp Fallback -->
+            <a id="wa-fallback-link" href="#" target="_blank" class="block bg-green-500 text-white p-3 rounded-xl text-center font-bold tap-anim shadow-md">
+                <i class="fa-brands fa-whatsapp mr-2 text-xl"></i> Contact Admin via WhatsApp
+            </a>
+
+            <!-- Profile Summary -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-2">My Profile</h3>
+                <div class="flex items-center gap-3 mb-3">
+                    <img id="my-photo" src="https://via.placeholder.com/50" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500">
+                    <div>
+                        <p class="font-bold" id="my-brand">Brand Name</p>
+                        <p class="text-xs text-slate-500" id="my-vehicle">Vehicle Type</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500">Work Phone: <span id="my-workphone" class="font-mono text-slate-800">-</span></p>
+                <p class="text-xs text-slate-400 mt-2">Approval Status: <span id="my-approval" class="font-bold text-red-500">Pending</span></p>
+            </div>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="dash-admin" class="hidden-view max-w-5xl mx-auto p-4 space-y-4">
+            <!-- Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                    <p class="text-xs text-slate-500">Total Drivers</p>
+                    <p class="text-xl font-bold" id="stat-drivers">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <p class="text-xs text-slate-500">Total Rides</p>
+                    <p class="text-xl font-bold" id="stat-rides">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-amber-500">
+                    <p class="text-xs text-slate-500">Pending Payments</p>
+                    <p class="text-xl font-bold" id="stat-pending">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <p class="text-xs text-slate-500">Reports</p>
+                    <p class="text-xl font-bold" id="stat-reports">0</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 overflow-x-auto pb-2">
+                <button onclick="showAdminTab('drivers')" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold whitespace-nowrap">Drivers & Approvals</button>
+                <button onclick="showAdminTab('landmarks')" class="px-4 py-2 bg-white text-slate-700 rounded-lg text-sm font-bold whitespace-nowrap border">Landmarks</button>
+                <button onclick="showAdminTab('broadcast')" class="px-4 py-2 bg-white text-slate-700 rounded-lg text-sm font-bold whitespace-nowrap border">Broadcast</button>
+            </div>
+
+            <!-- Admin Tab: Drivers -->
+            <div id="admin-tab-drivers" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-3 border-b bg-slate-50 flex gap-2">
+                    <input type="text" id="admin-search-driver" placeholder="Search driver name or type..." class="flex-1 p-2 border rounded-lg text-sm" onkeyup="renderAdminDrivers()">
+                </div>
+                <div id="admin-driver-list" class="divide-y max-h-96 overflow-y-auto">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Admin Tab: Landmarks -->
+            <div id="admin-tab-landmarks" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+                <h3 class="font-bold mb-3">Add Manual Landmark</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-4">
+                    <input type="text" id="lm-name" placeholder="Landmark Name" class="p-2 border rounded-lg text-sm">
+                    <input type="number" step="any" id="lm-lat" placeholder="Latitude" class="p-2 border rounded-lg text-sm">
+                    <input type="number" step="any" id="lm-lng" placeholder="Longitude" class="p-2 border rounded-lg text-sm">
+                    <button onclick="addLandmark()" class="bg-emerald-600 text-white rounded-lg text-sm font-bold tap-anim">Add</button>
+                </div>
+                <p class="text-xs text-slate-500">💡 Tip: Long-press on Google Maps to get Lat/Lng coordinates.</p>
+            </div>
+
+            <!-- Admin Tab: Broadcast -->
+            <div id="admin-tab-broadcast" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+                <h3 class="font-bold mb-3">Send Message to All</h3>
+                <textarea id="broadcast-msg" placeholder="Type your welcome or policy message here..." class="w-full p-3 border rounded-xl text-sm mb-3 h-24"></textarea>
+                <button onclick="sendBroadcast()" class="w-full bg-slate-900 text-white py-2 rounded-xl font-bold tap-anim">Send to All Users</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+    
+    <!-- Admin Hidden Login Modal -->
+    <div id="modal-admin-login" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm">
+            <h3 class="font-bold text-lg mb-4">Admin Access</h3>
+            <input type="text" id="admin-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" value="Okagia">
+            <input type="password" id="admin-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeModal('modal-admin-login')" class="flex-1 py-2 text-slate-500">Cancel</button>
+                <button onclick="verifyAdmin()" class="flex-1 bg-slate-900 text-white py-2 rounded-xl font-bold">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Submission Modal (Driver) -->
+    <div id="modal-payment" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm">
+            <h3 class="font-bold text-lg mb-4">Submit Payment Proof</h3>
+            <input type="number" id="pay-amount" placeholder="Amount Paid (GHS)" class="w-full p-3 border rounded-xl mb-3">
+            <input type="text" id="pay-ref" placeholder="MoMo Reference / Transaction ID" class="w-full p-3 border rounded-xl mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeModal('modal-payment')" class="flex-1 py-2 text-slate-500">Cancel</button>
+                <button onclick="submitPayment()" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl font-bold">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking / Rating Modal (Passenger) -->
+    <div id="modal-booking" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center">
+            <div id="booking-step-1">
+                <i class="fa-solid fa-circle-check text-4xl text-emerald-500 mb-3"></i>
+                <h3 class="font-bold text-lg mb-2">Request Sent!</h3>
+                <p class="text-sm text-slate-600 mb-4">Waiting for driver to accept...</p>
+                <button onclick="closeModal('modal-booking')" class="w-full bg-red-100 text-red-600 py-2 rounded-xl font-bold">Cancel Request</button>
+            </div>
+            <div id="booking-step-2" class="hidden">
+                <i class="fa-solid fa-motorcycle text-4xl text-emerald-600 mb-3"></i>
+                <h3 class="font-bold text-lg mb-1" id="accepted-driver-name">Driver Accepted!</h3>
+                <p class="text-sm text-slate-600 mb-2">Call them to confirm location:</p>
+                <a id="accepted-driver-phone" href="#" class="block w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-3 tap-anim">
+                    <i class="fa-solid fa-phone mr-2"></i> Call Driver
+                </a>
+                <button onclick="completeRideAndRate()" class="w-full bg-slate-200 text-slate-800 py-2 rounded-xl font-bold text-sm">I have completed the ride (Rate)</button>
+            </div>
+            <div id="booking-step-3" class="hidden">
+                <h3 class="font-bold text-lg mb-3">Rate your ride</h3>
+                <div class="flex justify-center gap-2 text-3xl text-slate-300 mb-4" id="star-rating">
+                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(1)"></i>
+                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(2)"></i>
+                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(3)"></i>
+                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(4)"></i>
+                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(5)"></i>
+                </div>
+                <textarea id="ride-complaint" placeholder="Any complaints? (Optional)" class="w-full p-2 border rounded-lg text-sm mb-3"></textarea>
+                <button onclick="submitRating()" class="w-full bg-slate-900 text-white py-2 rounded-xl font-bold">Submit & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Game Modal -->
+    <div id="modal-game" class="hidden-view fixed inset-0 bg-slate-900 z-[110] flex flex-col items-center justify-center p-4">
+        <div class="flex justify-between w-full max-w-md mb-2 text-white">
+            <span class="font-bold">Okada Dodge</span>
+            <button onclick="closeModal('modal-game')" class="text-slate-400">✕ Close</button>
+            <span class="font-bold text-amber-400">Score: <span id="game-score">0</span></span>
+        </div>
+        <canvas id="game-canvas" width="300" height="400" class="okada-game border-2 border-slate-700"></canvas>
+        <p class="text-slate-400 text-xs mt-4">Tap left/right sides of the box to move. Dodge the red cars!</p>
+        <button onclick="initGame()" class="mt-4 bg-emerald-500 text-white px-6 py-2 rounded-full font-bold tap-anim">Start / Restart</button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm shadow-xl hidden z-[120] transition-opacity duration-300">
+        Notification
+    </div>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // --- CONFIGURATION ---
+        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbxs9GdVGlv1b6Thy_bDVGBR9ZcSwnk0sN6kaHiHOD84WfDyfjsW4OjDsyfW5c3xB0TL8A/exec"; 
+        
+        let currentUser = null;
+        let authMode = 'login'; // 'login' or 'signup'
+        let selectedRole = 'Passenger';
+        let tapCount = 0;
+        let currentRating = 0;
+        let activeRideId = null;
+        let mapInstance = null;
+        let markers = [];
+
+        // --- NAVIGATION & UI ---
+        function showView(viewId) {
+            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById(viewId).classList.remove('hidden-view');
+        }
+
+        function showAuth(role) {
+            selectedRole = role;
+            document.getElementById('auth-title').innerText = role === 'Admin' ? 'Admin Login' : `${role} Login`;
+            document.getElementById('driver-reg-fields').classList.toggle('hidden', role !== 'Driver');
+            showView('view-auth');
+        }
+
+        function toggleAuthMode() {
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            document.getElementById('signup-fields').classList.toggle('hidden', authMode === 'login');
+            document.getElementById('auth-btn').innerText = authMode === 'login' ? 'Login' : 'Sign Up';
+            document.getElementById('auth-toggle').innerText = authMode === 'login' ? 'New user? Sign Up' : 'Already have an account? Login';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3000);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden-view');
+        }
+
+        // --- HIDDEN ADMIN TRIGGER ---
+        function adminTap() {
+            tapCount++;
+            if (tapCount >= 5) {
+                document.getElementById('modal-admin-login').classList.remove('hidden-view');
+                tapCount = 0;
+            }
+            setTimeout(() => tapCount = 0, 2000); // Reset if not tapped fast enough
+        }
+
+        function verifyAdmin() {
+            const u = document.getElementById('admin-user').value;
+            const p = document.getElementById('admin-pass').value;
+            if (u === 'Okagia' && p === 'password') { // Change default password as needed
+                currentUser = { name: 'Admin', role: 'Admin', phone: '000' };
+                closeModal('modal-admin-login');
+                loadDashboard();
+            } else {
+                showToast('Invalid Admin Credentials');
+            }
+        }
+
+        // --- API HELPER ---
+        async function callAPI(action, data = {}) {
+            showToast('Loading...');
+            try {
+                // For GET requests with small data, we can use URL params. 
+                // For robustness, we'll use POST with JSON payload stringified in 'data' param.
+                const url = `${API_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(data))}`;
+                const response = await fetch(url, { method: 'POST' }); // POST to avoid URL length limits
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error(error);
+                showToast('Network Error. Check API URL.');
+                return { status: 'error', message: 'Network Error' };
+            }
+        }
+
+        // --- AUTHENTICATION ---
+        async function handleAuth() {
+            const name = authMode === 'login' ? document.getElementById('login-name').value : document.getElementById('reg-name').value;
+            const phone = authMode === 'login' ? document.getElementById('login-phone').value : document.getElementById('reg-phone').value;
+
+            if (!name || !phone) return showToast('Please fill all fields');
+
+            if (authMode === 'signup') {
+                const payload = { name, phone, role: selectedRole };
+                if (selectedRole === 'Driver') {
+                    payload.brandName = document.getElementById('reg-brand').value;
+                    payload.vehicleType = document.getElementById('reg-vehicle').value;
+                    payload.workPhone = document.getElementById('reg-workphone').value;
+                    payload.photoURL = document.getElementById('reg-photo').value || 'https://via.placeholder.com/150';
+                }
+                const res = await callAPI('signup', payload);
+                if (res.status === 'success') {
+                    showToast('Signup successful! Please login.');
+                    toggleAuthMode();
+                } else {
+                    showToast(res.message);
+                }
+            } else {
+                const res = await callAPI('login', { phone });
+                if (res.status === 'success' && res.user.name.toLowerCase() === name.toLowerCase()) {
+                    currentUser = res.user;
+                    localStorage.setItem('okagia_user', JSON.stringify(currentUser));
+                    loadDashboard();
+                } else {
+                    showToast('Invalid Name or Phone Number');
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('okagia_user');
+            currentUser = null;
+            showView('view-landing');
+        }
+
+        // --- DASHBOARD LOADER ---
+        async function loadDashboard() {
+            showView('view-app');
+            document.getElementById('user-display-name').innerText = currentUser.name;
+            
+            // Hide all dashes first
+            document.getElementById('dash-passenger').classList.add('hidden-view');
+            document.getElementById('dash-driver').classList.add('hidden-view');
+            document.getElementById('dash-admin').classList.add('hidden-view');
+
+            // Fetch Settings for Welcome Message
+            const settingsRes = await callAPI('getSettings');
+            if (settingsRes.status === 'success') {
+                document.getElementById('welcome-msg-text').innerText = settingsRes.settings.WelcomeMessage || 'Welcome to OKAGIA!';
+                document.getElementById('welcome-banner').classList.remove('hidden');
+                
+                // Setup WhatsApp Fallback for Drivers
+                const waNum = settingsRes.settings.AdminWaNumber || '233000000000';
+                const waMsg = `Hello OKAGIA Admin, I am ${currentUser.name} (${currentUser.phone}). My issue is: `;
+                document.getElementById('wa-fallback-link').href = `https://wa.me/${waNum}?text=${encodeURIComponent(waMsg)}`;
+            }
+
+            if (currentUser.role === 'Passenger') {
+                document.getElementById('dash-passenger').classList.remove('hidden-view');
+            } else if (currentUser.role === 'Driver') {
+                document.getElementById('dash-driver').classList.remove('hidden-view');
+                loadDriverProfile();
+            } else if (currentUser.role === 'Admin') {
+                document.getElementById('dash-admin').classList.remove('hidden-view');
+                loadAdminData();
+            }
+        }
+
+        // --- DRIVER LOGIC ---
+        async function loadDriverProfile() {
+            // In a full app, we'd fetch specific driver data. For MVP, we simulate or fetch from a dedicated endpoint.
+            // Let's assume we fetch it via a generic 'getDriverProfile' action (needs to be added to Apps Script if not present, or we mock it from localStorage for now).
+            // For this MVP, let's just show a mock update or fetch if backend supports it.
+            document.getElementById('my-brand').innerText = "My Brand"; // Update with real data fetch
+            document.getElementById('my-vehicle').innerText = "Vehicle Type";
+            document.getElementById('my-workphone').innerText = "024XXXXXXX";
+        }
+
+        async function toggleDriverStatus() {
+            const btn = document.getElementById('driver-status-btn');
+            const txt = document.getElementById('driver-status-text');
+            
+            if (btn.innerText === 'GO ONLINE') {
+                btn.innerText = 'GO OFFLINE';
+                btn.classList.replace('bg-slate-300', 'bg-red-500');
+                btn.classList.replace('text-slate-600', 'text-white');
+                txt.innerText = 'Currently Online & Available';
+                txt.classList.replace('text-slate-400', 'text-emerald-600');
+                await callAPI('updateDriverStatus', { phone: currentUser.phone, status: 'Online-Available' });
+                showToast('You are now ONLINE');
+            } else {
+                btn.innerText = 'GO ONLINE';
+                btn.classList.replace('bg-red-500', 'bg-slate-300');
+                btn.classList.replace('text-white', 'text-slate-600');
+                txt.innerText = 'Currently Offline';
+                txt.classList.replace('text-emerald-600', 'text-slate-400');
+                await callAPI('updateDriverStatus', { phone: currentUser.phone, status: 'Offline' });
+                showToast('You are now OFFLINE');
+            }
+        }
+
+        function showPaymentModal() {
+            document.getElementById('modal-payment').classList.remove('hidden-view');
+        }
+
+        async function submitPayment() {
+            const amount = document.getElementById('pay-amount').value;
+            const ref = document.getElementById('pay-ref').value;
+            if (!amount || !ref) return showToast('Fill all fields');
+
+            const res = await callAPI('submitPayment', { phone: currentUser.phone, amount, reference: ref });
+            if (res.status === 'success') {
+                showToast('Payment submitted for Admin approval!');
+                closeModal('modal-payment');
+            }
+        }
+
+        function handleRideResponse(accepted) {
+            if (accepted) {
+                // This calls the backend which charges the driver and updates status
+                callAPI('acceptRide', { rideId: activeRideId, driverPhone: currentUser.phone }).then(res => {
+                    if (res.status === 'success') {
+                        showToast('Ride Accepted! Fee applied.');
+                        document.getElementById('driver-ride-alert').classList.add('hidden');
+                        // Update owed amount visually (mock)
+                        let currentOwed = parseFloat(document.getElementById('driver-owed').innerText);
+                        document.getElementById('driver-owed').innerText = (currentOwed + 0.50).toFixed(2);
+                    }
+                });
+            } else {
+                document.getElementById('driver-ride-alert').classList.add('hidden');
+                showToast('Ride Refused');
+            }
+        }
+
+        // --- PASSENGER LOGIC ---
+        // Haversine Formula to calculate distance in km
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            var R = 6371; // Radius of the earth in km
+            var dLat = deg2rad(lat2 - lat1);
+            var dLon = deg2rad(lon2 - lon1);
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var d = R * c; // Distance in km
+            return d;
+        }
+        function deg2rad(deg) { return deg * (Math.PI / 180); }
+
+        async function searchDrivers() {
+            const landmark = document.getElementById('p-search-landmark').value;
+            const vType = document.getElementById('p-filter-type').value;
+            
+            showToast('Searching nearby drivers...');
+            
+            // Mocking passenger location for MVP (In production, use navigator.geolocation)
+            const pLat = 6.6885; // Example: Kumasi
+            const pLng = -1.6244; 
+
+            const res = await callAPI('getNearbyDrivers', { lat: pLat, lng: pLng, vehicleType: vType });
+            
+            const list = document.getElementById('driver-list');
+            list.innerHTML = '';
+
+            if (res.status === 'success' && res.drivers.length > 0) {
+                // Sort by distance (mocking driver lat/lng for MVP)
+                res.drivers.forEach((d, index) => {
+                    const mockDist = (Math.random() * 5 + 0.5).toFixed(1); // Random distance 0.5 - 5.5km
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 tap-anim';
+                    card.innerHTML = `
+                        <img src="${d.photoURL}" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-100">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800">${d.brandName}</h4>
+                            <p class="text-xs text-slate-500">${d.vehicleType} • ${mockDist} km away</p>
+                            <div class="flex text-amber-400 text-xs mt-1">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                        </div>
+                        <button onclick="requestRide('${d.phone}', '${d.brandName}', '${d.workPhone}')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">Book</button>
+                    `;
+                    list.appendChild(card);
+                });
+            } else {
+                list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No drivers available nearby.</p>';
+            }
+        }
+
+        function toggleMapView() {
+            const isMap = document.getElementById('toggle-map').checked;
+            const mapContainer = document.getElementById('map-container');
+            if (isMap) {
+                mapContainer.classList.remove('hidden-view');
+                setTimeout(() => {
+                    if (!mapInstance) {
+                        mapInstance = L.map('map').setView([6.6885, -1.6244], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+                    }
+                    mapInstance.invalidateSize();
+                }, 100);
+            } else {
+                mapContainer.classList.add('hidden-view');
+            }
+        }
+
+        function requestRide(driverPhone, brandName, workPhone) {
+            activeRideId = 'RIDE-' + Math.floor(Math.random() * 10000);
+            document.getElementById('booking-step-1').classList.remove('hidden');
+            document.getElementById('booking-step-2').classList.add('hidden');
+            document.getElementById('booking-step-3').classList.add('hidden');
+            document.getElementById('modal-booking').classList.remove('hidden-view');
+
+            // Simulate driver accepting after 3 seconds for MVP demo
+            setTimeout(() => {
+                document.getElementById('booking-step-1').classList.add('hidden');
+                document.getElementById('booking-step-2').classList.remove('hidden');
+                document.getElementById('accepted-driver-name').innerText = `${brandName} Accepted!`;
+                document.getElementById('accepted-driver-phone').href = `tel:${workPhone}`;
+                showToast('Driver has accepted your ride!');
+            }, 3000);
+        }
+
+        function completeRideAndRate() {
+            document.getElementById('booking-step-2').classList.add('hidden');
+            document.getElementById('booking-step-3').classList.remove('hidden');
+        }
+
+        function setRating(stars) {
+            currentRating = stars;
+            const starIcons = document.getElementById('star-rating').children;
+            for (let i = 0; i < 5; i++) {
+                if (i < stars) starIcons[i].classList.replace('text-slate-300', 'text-amber-400');
+                else starIcons[i].classList.replace('text-amber-400', 'text-slate-300');
+            }
+        }
+
+        function submitRating() {
+            const complaint = document.getElementById('ride-complaint').value;
+            showToast(`Rated ${currentRating} stars. Thank you!`);
+            closeModal('modal-booking');
+            // Here you would call API to save rating/complaint
+        }
+
+        // --- ADMIN LOGIC ---
+        function showAdminTab(tab) {
+            document.getElementById('admin-tab-drivers').classList.add('hidden-view');
+            document.getElementById('admin-tab-landmarks').classList.add('hidden-view');
+            document.getElementById('admin-tab-broadcast').classList.add('hidden-view');
+            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden-view');
+        }
+
+        async function loadAdminData() {
+            // Mock data population for MVP
+            document.getElementById('stat-drivers').innerText = "12";
+            document.getElementById('stat-rides').innerText = "45";
+            document.getElementById('stat-pending').innerText = "3";
+            document.getElementById('stat-reports').innerText = "1";
+            renderAdminDrivers();
+        }
+
+        function renderAdminDrivers() {
+            const list = document.getElementById('admin-driver-list');
+            list.innerHTML = `
+                <div class="p-4 flex justify-between items-center hover:bg-slate-50">
+                    <div>
+                        <p class="font-bold text-sm">Kofi Express</p>
+                        <p class="text-xs text-slate-500">2 Tyres • 024XXXXXXX</p>
+                        <p class="text-xs text-red-500">Owes: GHS 1.50</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">Approve</button>
+                        <button class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs font-bold">Deactivate</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addLandmark() {
+            const name = document.getElementById('lm-name').value;
+            const lat = document.getElementById('lm-lat').value;
+            const lng = document.getElementById('lm-lng').value;
+            if(!name || !lat || !lng) return showToast('Fill all landmark fields');
+            
+            showToast('Landmark added successfully!');
+            document.getElementById('lm-name').value = '';
+            document.getElementById('lm-lat').value = '';
+            document.getElementById('lm-lng').value = '';
+            // Call API to save landmark here
+        }
+
+        async function sendBroadcast() {
+            const msg = document.getElementById('broadcast-msg').value;
+            if(!msg) return showToast('Type a message first');
+            showToast('Broadcast sent to all users via Telegram!');
+            document.getElementById('broadcast-msg').value = '';
+            // Call API to broadcast here
+        }
+
+        // --- MINI GAME: OKADA DODGE ---
+        let gameInterval;
+        let score = 0;
+        let playerX = 135;
+        let obstacles = [];
+
+        function startGame() {
+            document.getElementById('modal-game').classList.remove('hidden-view');
+            initGame();
+        }
+
+        function initGame() {
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            score = 0;
+            playerX = 135;
+            obstacles = [];
+            document.getElementById('game-score').innerText = score;
+
+            if (gameInterval) clearInterval(gameInterval);
+
+            // Controls
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                if (x < 150) playerX = Math.max(10, playerX - 40);
+                else playerX = Math.min(260, playerX + 40);
+            };
+
+            gameInterval = setInterval(() => {
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 0, 300, 400);
+
+                // Draw Player (Okada - Green)
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(playerX, 350, 30, 40);
+
+                // Spawn Obstacles (Cars - Red)
+                if (Math.random() < 0.05) {
+                    obstacles.push({ x: Math.random() * 270, y: -40 });
+                }
+
+                // Draw & Move Obstacles
+                ctx.fillStyle = '#ef4444';
+                for (let i = 0; i < obstacles.length; i++) {
+                    let obs = obstacles[i];
+                    obs.y += 3;
+                    ctx.fillRect(obs.x, obs.y, 30, 40);
+
+                    // Collision
+                    if (obs.y > 310 && obs.y < 390 && Math.abs(obs.x - playerX) < 30) {
+                        clearInterval(gameInterval);
+                        showToast('Game Over! Score: ' + score);
+                    }
+
+                    // Score
+                    if (obs.y > 400) {
+                        obstacles.splice(i, 1);
+                        i--;
+                        score++;
+                        document.getElementById('game-score').innerText = score;
+                    }
+                }
+            }, 20);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            const savedUser = localStorage.getItem('okagia_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loadDashboard();
+            }
+
+            // Register PWA Service Worker (Inline Blob for zero-file setup)
+            if ('serviceWorker' in navigator) {
+                const swCode = `self.addEventListener('install', e => e.waitUntil(self.skipWaiting())); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));`;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
+            }
+        };
+    </script>
+</body</html>
