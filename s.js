@@ -64,7 +64,7 @@ self.addEventListener('fetch', e => {
     return e.respondWith(
       fetch(e.request).catch(() =>
         new Response(
-          JSON.stringify({ status: 'error', message: 'You are offline. check your internet connection' }),
+          JSON.stringify({ status: 'error', message: 'You are offline.' }),
           { headers: { 'Content-Type': 'application/json' } }
         )
       )
