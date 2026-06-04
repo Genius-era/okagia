@@ -5,39 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OKAGIA</title>
     <meta name="theme-color" content="#0f172a">
-    <meta name="description" content="OKAGIA - Premium Okada, Pragia, and Taxi Booking">
+    <link rel="manifest" href="manifest.json">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet Map CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
-        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; margin: 0; }
         .tap-anim { transition: transform 0.1s; }
         .tap-anim:active { transform: scale(0.95); }
         #map { height: 300px; width: 100%; border-radius: 12px; z-index: 1; }
         .hidden-view { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .okada-game { background: #1e293b; border-radius: 12px; }
     </style>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"OKAGIA","short_name":"OKAGIA","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3097/3097180.png","sizes":"192x192","type":"image/png"}]}'>
 </head>
 <body class="text-slate-800 antialiased">
 
-   
-
-    <!-- ==================== LANDING PAGE ==================== -->
+    <!-- LANDING PAGE -->
     <div id="view-landing" class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 text-white">
         <div id="logo-trigger" class="tap-anim cursor-pointer mb-8 text-center">
             <i class="fa-solid fa-motorcycle text-6xl text-emerald-400 mb-2"></i>
@@ -46,7 +33,7 @@
         </div>
 
         <div class="w-full max-w-sm space-y-4">
-            <button onclick="showAuth('Passenger')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-500/30 tap-anim flex items-center justify-center gap-3">
+            <button onclick="showAuth('Passenger')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg tap-anim flex items-center justify-center gap-3">
                 <i class="fa-solid fa-user text-xl"></i> I'm a Passenger
             </button>
             <button onclick="showAuth('Driver')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg tap-anim flex items-center justify-center gap-3">
@@ -57,51 +44,46 @@
         <button onclick="startGame()" class="mt-12 text-slate-400 text-xs flex items-center gap-2 hover:text-emerald-400 transition">
             <i class="fa-solid fa-gamepad"></i> Play Okada Dodge
         </button>
-
-        <!-- Hidden Admin Trigger Text (Changed to light grey so it's barely visible but clickable) -->
-        <p onclick="adminTap()" class="mt-16 text-[10px] text-slate-600 select-none cursor-pointer hover:text-slate-500">v1.0.4 build</p>
+        <p onclick="adminTap()" class="mt-16 text-[10px] text-slate-700 select-none cursor-pointer">v1.1.0 build</p>
     </div>
 
-    <!-- ==================== AUTH PAGE ==================== -->
+    <!-- AUTH PAGE -->
     <div id="view-auth" class="hidden-view min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
         <div class="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl">
             <h2 id="auth-title" class="text-2xl font-bold mb-6 text-slate-800">Login</h2>
             
             <div id="signup-fields" class="hidden space-y-4 mb-4">
-                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
-                <input type="tel" id="reg-phone" placeholder="Phone Number (e.g., 024XXXXXXX)" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+                <input type="tel" id="reg-phone" placeholder="Phone Number (e.g., 024XXXXXXX)" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
                 
-                <!-- Driver Specific Fields -->
                 <div id="driver-reg-fields" class="hidden space-y-4">
-                    <input type="text" id="reg-brand" placeholder="Brand Name (e.g., Kofi Express)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
+                    <input type="text" id="reg-brand" placeholder="Brand Name" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
                     <select id="reg-vehicle" class="w-full p-3 border border-slate-200 rounded-xl outline-none bg-white">
                         <option value="2 Tyres">2 Tyres (Okada)</option>
-                        <option value="3 Tyres">3 Tyres (Pragia/Aboboyaa)</option>
+                        <option value="3 Tyres">3 Tyres (Pragia)</option>
                         <option value="4 Tyres">4 Tyres (Taxi)</option>
                     </select>
-                    <input type="tel" id="reg-workphone" placeholder="Work Phone Number (for passengers to call)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
-                    <input type="url" id="reg-photo" placeholder="Photo URL (Paste link from ImgBB)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
-                    <p class="text-xs text-slate-500">💡 Tip: Upload your photo to <a href="https://imgbb.com/" target="_blank" class="text-emerald-600 underline">imgbb.com</a> and paste the direct link here.</p>
+                    <input type="tel" id="reg-workphone" placeholder="Work Phone Number" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
+                    <input type="url" id="reg-photo" placeholder="Photo URL (from imgbb.com)" class="w-full p-3 border border-slate-200 rounded-xl outline-none">
                     <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-800">
-                        <i class="fa-solid fa-circle-info mr-1"></i> Policy: You will be charged <b>0.50 GHS</b> (2/3 tyres) or <b>1.00 GHS</b> (4 tyres) <b>only</b> when you go Online AND accept at least one passenger.
+                        <i class="fa-solid fa-circle-info mr-1"></i> Policy: Charged <b>0.50 GHS</b> (2/3 tyres) or <b>1.00 GHS</b> (4 tyres) <b>only</b> when Online AND accepting a passenger.
                     </div>
                 </div>
             </div>
 
             <div class="space-y-4 mt-4">
-                <input type="text" id="login-name" placeholder="Your Name" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
-                <input type="tel" id="login-phone" placeholder="Phone Number (Your Password)" class="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="text" id="login-name" placeholder="Your Name" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+                <input type="tel" id="login-phone" placeholder="Phone Number" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
             </div>
 
-            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl mt-6 tap-anim">Login</button>
+            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl mt-6 tap-anim">Login</button>
             <p id="auth-toggle" onclick="toggleAuthMode()" class="text-center text-sm text-slate-500 mt-4 cursor-pointer hover:text-emerald-600">New user? Sign Up</p>
             <button onclick="showView('view-landing')" class="w-full text-center text-slate-400 text-sm mt-4">← Back</button>
         </div>
     </div>
 
-    <!-- ==================== MAIN APP CONTAINER ==================== -->
+    <!-- MAIN APP -->
     <div id="view-app" class="hidden-view min-h-screen bg-slate-50 pb-20">
-        <!-- Header -->
         <header class="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md">
             <div class="flex justify-between items-center max-w-4xl mx-auto">
                 <div class="flex items-center gap-2">
@@ -115,7 +97,6 @@
             </div>
         </header>
 
-        <!-- Welcome Banner -->
         <div id="welcome-banner" class="bg-emerald-600 text-white p-4 text-center text-sm font-medium hidden">
             <i class="fa-solid fa-bullhorn mr-2"></i> <span id="welcome-msg-text">Welcome to OKAGIA!</span>
         </div>
@@ -124,32 +105,28 @@
         <div id="dash-passenger" class="hidden-view max-w-4xl mx-auto p-4 space-y-4">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                 <h3 class="font-bold text-slate-800 mb-3">Find a Ride</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                    <input type="text" id="p-search-landmark" placeholder="Your Landmark / Location" class="p-2 border rounded-lg text-sm">
-                    <select id="p-filter-type" class="p-2 border rounded-lg text-sm bg-white">
+                <div class="grid grid-cols-1 gap-2 mb-3">
+                    <select id="p-filter-landmark" class="p-3 border rounded-xl text-sm bg-white">
+                        <option value="">Select Nearby Landmark...</option>
+                    </select>
+                    <select id="p-filter-type" class="p-3 border rounded-xl text-sm bg-white">
                         <option value="">All Vehicles</option>
                         <option value="2 Tyres">2 Tyres</option>
                         <option value="3 Tyres">3 Tyres</option>
                         <option value="4 Tyres">4 Tyres</option>
                     </select>
-                    <button onclick="searchDrivers()" class="bg-slate-900 text-white rounded-lg text-sm font-bold tap-anim">Search Nearby</button>
-                </div>
-                <div class="flex items-center justify-between mt-2">
-                    <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                        <input type="checkbox" id="toggle-map" onchange="toggleMapView()" class="accent-emerald-600"> Show on Map
-                    </label>
-                    <span class="text-xs text-slate-400">Sorted by nearest distance</span>
+                    <button onclick="searchDrivers()" class="bg-slate-900 text-white rounded-xl text-sm font-bold py-3 tap-anim flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-location-crosshairs"></i> Search Nearby (Uses GPS)
+                    </button>
                 </div>
             </div>
 
-            <!-- Map Container -->
             <div id="map-container" class="hidden-view mb-4">
                 <div id="map"></div>
             </div>
 
-            <!-- Driver List -->
             <div id="driver-list" class="space-y-3">
-                <p class="text-center text-slate-400 text-sm py-8">Search for a location to see available drivers.</p>
+                <p class="text-center text-slate-400 text-sm py-8">Tap "Search Nearby" to find drivers around your exact GPS location.</p>
             </div>
         </div>
 
@@ -158,9 +135,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
                     <p class="text-slate-500 text-sm mb-2">Your Status</p>
-                    <button id="driver-status-btn" onclick="toggleDriverStatus()" class="w-full py-3 rounded-xl font-bold text-lg tap-anim bg-slate-300 text-slate-600">
-                        GO ONLINE
-                    </button>
+                    <button id="driver-status-btn" onclick="toggleDriverStatus()" class="w-full py-3 rounded-xl font-bold text-lg tap-anim bg-slate-300 text-slate-600">GO ONLINE</button>
                     <p id="driver-status-text" class="text-xs text-slate-400 mt-2">Currently Offline</p>
                 </div>
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
@@ -170,57 +145,18 @@
                 </div>
             </div>
 
-            <!-- Active Ride Alert -->
-            <div id="driver-ride-alert" class="hidden bg-amber-50 border-2 border-amber-400 p-4 rounded-2xl shadow-lg">
-                <h3 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-bell mr-2"></i>New Ride Request!</h3>
-                <p class="text-sm text-amber-900 mb-3">Passenger at: <b id="req-pickup">Unknown</b></p>
-                <div class="flex gap-2">
-                    <button onclick="handleRideResponse(true)" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold tap-anim">✅ Accept</button>
-                    <button onclick="handleRideResponse(false)" class="flex-1 bg-red-500 text-white py-2 rounded-lg font-bold tap-anim">❌ Refuse</button>
-                </div>
-            </div>
-
-            <!-- WhatsApp Fallback -->
             <a id="wa-fallback-link" href="#" target="_blank" class="block bg-green-500 text-white p-3 rounded-xl text-center font-bold tap-anim shadow-md">
                 <i class="fa-brands fa-whatsapp mr-2 text-xl"></i> Contact Admin via WhatsApp
             </a>
 
-            <!-- Profile Summary -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                 <h3 class="font-bold text-slate-800 mb-2">My Profile</h3>
-                <div class="flex items-center gap-3 mb-3">
-                    <img id="my-photo" src="https://via.placeholder.com/50" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500">
-                    <div>
-                        <p class="font-bold" id="my-brand">Brand Name</p>
-                        <p class="text-xs text-slate-500" id="my-vehicle">Vehicle Type</p>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-500">Work Phone: <span id="my-workphone" class="font-mono text-slate-800">-</span></p>
                 <p class="text-xs text-slate-400 mt-2">Approval Status: <span id="my-approval" class="font-bold text-amber-600">Pending Admin Approval</span></p>
             </div>
         </div>
 
         <!-- ADMIN DASHBOARD -->
         <div id="dash-admin" class="hidden-view max-w-5xl mx-auto p-4 space-y-4">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-emerald-500">
-                    <p class="text-xs text-slate-500">Total Drivers</p>
-                    <p class="text-xl font-bold" id="stat-drivers">0</p>
-                </div>
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-blue-500">
-                    <p class="text-xs text-slate-500">Total Rides</p>
-                    <p class="text-xl font-bold" id="stat-rides">0</p>
-                </div>
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-amber-500">
-                    <p class="text-xs text-slate-500">Pending Payments</p>
-                    <p class="text-xl font-bold" id="stat-pending">0</p>
-                </div>
-                <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-red-500">
-                    <p class="text-xs text-slate-500">Reports</p>
-                    <p class="text-xl font-bold" id="stat-reports">0</p>
-                </div>
-            </div>
-
             <div class="flex gap-2 overflow-x-auto pb-2">
                 <button onclick="showAdminTab('drivers')" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold whitespace-nowrap">Drivers & Approvals</button>
                 <button onclick="showAdminTab('landmarks')" class="px-4 py-2 bg-white text-slate-700 rounded-lg text-sm font-bold whitespace-nowrap border">Landmarks</button>
@@ -228,44 +164,38 @@
             </div>
 
             <div id="admin-tab-drivers" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-3 border-b bg-slate-50 flex gap-2">
-                    <input type="text" id="admin-search-driver" placeholder="Search driver name or type..." class="flex-1 p-2 border rounded-lg text-sm" onkeyup="renderAdminDrivers()">
+                <div class="p-3 border-b bg-slate-50">
+                    <h3 class="font-bold text-sm">Registered Drivers</h3>
                 </div>
-                <div id="admin-driver-list" class="divide-y max-h-96 overflow-y-auto">
-                    <div class="p-4 flex justify-between items-center hover:bg-slate-50">
-                        <div>
-                            <p class="font-bold text-sm">Kofi Express (Demo)</p>
-                            <p class="text-xs text-slate-500">2 Tyres • 024XXXXXXX</p>
-                            <p class="text-xs text-red-500">Owes: GHS 1.50</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">Approve</button>
-                            <button class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs font-bold">Deactivate</button>
-                        </div>
-                    </div>
+                <div id="admin-driver-list" class="divide-y max-h-96 overflow-y-auto p-2">
+                    <p class="text-center text-slate-400 py-4">Loading drivers...</p>
                 </div>
             </div>
 
             <div id="admin-tab-landmarks" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
                 <h3 class="font-bold mb-3">Add Manual Landmark</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-4">
-                    <input type="text" id="lm-name" placeholder="Landmark Name" class="p-2 border rounded-lg text-sm">
-                    <input type="number" step="any" id="lm-lat" placeholder="Latitude" class="p-2 border rounded-lg text-sm">
-                    <input type="number" step="any" id="lm-lng" placeholder="Longitude" class="p-2 border rounded-lg text-sm">
-                    <button onclick="addLandmark()" class="bg-emerald-600 text-white rounded-lg text-sm font-bold tap-anim">Add</button>
+                <button onclick="getAdminLocation()" class="w-full mb-3 bg-blue-100 text-blue-700 py-2 rounded-xl text-sm font-bold tap-anim flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-location-crosshairs"></i> Use My Current GPS Location
+                </button>
+                <div class="grid grid-cols-1 gap-2 mb-4">
+                    <input type="text" id="lm-name" placeholder="Landmark Name (e.g., KNUST Main Gate)" class="p-3 border rounded-xl text-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" step="any" id="lm-lat" placeholder="Latitude" class="p-3 border rounded-xl text-sm">
+                        <input type="number" step="any" id="lm-lng" placeholder="Longitude" class="p-3 border rounded-xl text-sm">
+                    </div>
+                    <button onclick="addLandmark()" class="bg-emerald-600 text-white rounded-xl text-sm font-bold py-3 tap-anim">Save Landmark</button>
                 </div>
-                <p class="text-xs text-slate-500">💡 Tip: Long-press on Google Maps to get Lat/Lng coordinates.</p>
             </div>
 
             <div id="admin-tab-broadcast" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
                 <h3 class="font-bold mb-3">Send Message to All</h3>
                 <textarea id="broadcast-msg" placeholder="Type your welcome or policy message here..." class="w-full p-3 border rounded-xl text-sm mb-3 h-24"></textarea>
-                <button onclick="sendBroadcast()" class="w-full bg-slate-900 text-white py-2 rounded-xl font-bold tap-anim">Send to All Users</button>
+                <button onclick="sendBroadcast()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold tap-anim">Save Broadcast Message</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MODALS ==================== -->
+    <!-- MODALS -->
     <div id="modal-admin-login" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm">
             <h3 class="font-bold text-lg mb-4">Admin Access</h3>
@@ -305,19 +235,7 @@
                 <a id="accepted-driver-phone" href="#" class="block w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-3 tap-anim">
                     <i class="fa-solid fa-phone mr-2"></i> Call Driver
                 </a>
-                <button onclick="completeRideAndRate()" class="w-full bg-slate-200 text-slate-800 py-2 rounded-xl font-bold text-sm">I have completed the ride (Rate)</button>
-            </div>
-            <div id="booking-step-3" class="hidden">
-                <h3 class="font-bold text-lg mb-3">Rate your ride</h3>
-                <div class="flex justify-center gap-2 text-3xl text-slate-300 mb-4" id="star-rating">
-                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(1)"></i>
-                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(2)"></i>
-                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(3)"></i>
-                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(4)"></i>
-                    <i class="fa-solid fa-star cursor-pointer hover:text-amber-400" onclick="setRating(5)"></i>
-                </div>
-                <textarea id="ride-complaint" placeholder="Any complaints? (Optional)" class="w-full p-2 border rounded-lg text-sm mb-3"></textarea>
-                <button onclick="submitRating()" class="w-full bg-slate-900 text-white py-2 rounded-xl font-bold">Submit & Close</button>
+                <button onclick="closeModal('modal-booking')" class="w-full bg-slate-200 text-slate-800 py-2 rounded-xl font-bold text-sm">Close</button>
             </div>
         </div>
     </div>
@@ -329,27 +247,24 @@
             <span class="font-bold text-amber-400">Score: <span id="game-score">0</span></span>
         </div>
         <canvas id="game-canvas" width="300" height="400" class="okada-game border-2 border-slate-700"></canvas>
-        <p class="text-slate-400 text-xs mt-4">Tap left/right sides of the box to move. Dodge the red cars!</p>
+        <p class="text-slate-400 text-xs mt-4">Tap left/right sides of the box to move.</p>
         <button onclick="initGame()" class="mt-4 bg-emerald-500 text-white px-6 py-2 rounded-full font-bold tap-anim">Start / Restart</button>
     </div>
 
-    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm shadow-xl hidden z-[120] transition-opacity duration-300">
-        Notification
-    </div>
+    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm shadow-xl hidden z-[120] transition-opacity duration-300">Notification</div>
 
-    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
     <script>
-        // --- CONFIGURATION ---
-        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL
+        
         const API_URL = "https://script.google.com/macros/s/AKfycbxs9GdVGlv1b6Thy_bDVGBR9ZcSwnk0sN6kaHiHOD84WfDyfjsW4OjDsyfW5c3xB0TL8A/exec"; 
         
         let currentUser = null;
         let authMode = 'login';
         let selectedRole = 'Passenger';
         let tapCount = 0;
-        let currentRating = 0;
         let activeRideId = null;
         let mapInstance = null;
+        let userLat = null;
+        let userLng = null;
 
         function showView(viewId) {
             document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden-view'));
@@ -358,7 +273,7 @@
 
         function showAuth(role) {
             selectedRole = role;
-            document.getElementById('auth-title').innerText = role === 'Admin' ? 'Admin Login' : `${role} Login`;
+            document.getElementById('auth-title').innerText = `${role} Login`;
             document.getElementById('driver-reg-fields').classList.toggle('hidden', role !== 'Driver');
             showView('view-auth');
         }
@@ -377,9 +292,7 @@
             setTimeout(() => t.classList.add('hidden'), 3000);
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden-view');
-        }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden-view'); }
 
         function adminTap() {
             tapCount++;
@@ -391,9 +304,7 @@
         }
 
         function verifyAdmin() {
-            const u = document.getElementById('admin-user').value;
-            const p = document.getElementById('admin-pass').value;
-            if (u === 'Okagia' && p === 'password') {
+            if (document.getElementById('admin-user').value === 'Okagia' && document.getElementById('admin-pass').value === 'password') {
                 currentUser = { name: 'Admin', role: 'Admin', phone: '000' };
                 closeModal('modal-admin-login');
                 loadDashboard();
@@ -407,10 +318,8 @@
             try {
                 const url = `${API_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(data))}`;
                 const response = await fetch(url, { method: 'POST' });
-                const result = await response.json();
-                return result;
+                return await response.json();
             } catch (error) {
-                console.error(error);
                 showToast('Network Error. Check API URL.');
                 return { status: 'error', message: 'Network Error' };
             }
@@ -455,6 +364,28 @@
             showView('view-landing');
         }
 
+        // --- REAL GPS FUNCTION ---
+        function getCurrentLocation() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject("Geolocation is not supported by your browser");
+                } else {
+                    showToast("Getting your exact GPS location...");
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            userLat = position.coords.latitude;
+                            userLng = position.coords.longitude;
+                            resolve({ lat: userLat, lng: userLng });
+                        },
+                        (error) => {
+                            reject("Unable to retrieve your location. Please enable GPS.");
+                        },
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
+                }
+            });
+        }
+
         async function loadDashboard() {
             showView('view-app');
             document.getElementById('user-display-name').innerText = currentUser.name;
@@ -465,135 +396,122 @@
 
             const settingsRes = await callAPI('getSettings');
             if (settingsRes.status === 'success') {
-                document.getElementById('welcome-msg-text').innerText = settingsRes.settings.WelcomeMessage || 'Welcome to OKAGIA!';
+                const settings = settingsRes.settings;
+                document.getElementById('welcome-msg-text').innerText = settings.WelcomeMessage || 'Welcome to OKAGIA!';
                 document.getElementById('welcome-banner').classList.remove('hidden');
                 
-                const waNum = settingsRes.settings.AdminWaNumber || '233000000000';
-                const waMsg = `Hello OKAGIA Admin, I am ${currentUser.name} (${currentUser.phone}). My issue is: `;
-                document.getElementById('wa-fallback-link').href = `https://wa.me/${waNum}?text=${encodeURIComponent(waMsg)}`;
+                // STRICTLY use database number
+                const waNum = settings.AdminWaNumber;
+                if (waNum) {
+                    const waMsg = `Hello OKAGIA Admin, I am ${currentUser.name} (${currentUser.phone}). My issue is: `;
+                    document.getElementById('wa-fallback-link').href = `https://wa.me/${waNum}?text=${encodeURIComponent(waMsg)}`;
+                } else {
+                    document.getElementById('wa-fallback-link').innerText = "⚠️ Admin WhatsApp not set in Database";
+                    document.getElementById('wa-fallback-link').classList.replace('bg-green-500', 'bg-red-500');
+                }
             }
 
             if (currentUser.role === 'Passenger') {
                 document.getElementById('dash-passenger').classList.remove('hidden-view');
+                loadLandmarksForPassenger();
             } else if (currentUser.role === 'Driver') {
                 document.getElementById('dash-driver').classList.remove('hidden-view');
             } else if (currentUser.role === 'Admin') {
                 document.getElementById('dash-admin').classList.remove('hidden-view');
-                loadAdminData();
+                loadAdminDrivers();
             }
         }
 
-        async function toggleDriverStatus() {
-            const btn = document.getElementById('driver-status-btn');
-            const txt = document.getElementById('driver-status-text');
-            
-            if (btn.innerText === 'GO ONLINE') {
-                btn.innerText = 'GO OFFLINE';
-                btn.classList.replace('bg-slate-300', 'bg-red-500');
-                btn.classList.replace('text-slate-600', 'text-white');
-                txt.innerText = 'Currently Online & Available';
-                txt.classList.replace('text-slate-400', 'text-emerald-600');
-                await callAPI('updateDriverStatus', { phone: currentUser.phone, status: 'Online-Available' });
-                showToast('You are now ONLINE');
-            } else {
-                btn.innerText = 'GO ONLINE';
-                btn.classList.replace('bg-red-500', 'bg-slate-300');
-                btn.classList.replace('text-white', 'text-slate-600');
-                txt.innerText = 'Currently Offline';
-                txt.classList.replace('text-emerald-600', 'text-slate-400');
-                await callAPI('updateDriverStatus', { phone: currentUser.phone, status: 'Offline' });
-                showToast('You are now OFFLINE');
-            }
-        }
-
-        function showPaymentModal() {
-            document.getElementById('modal-payment').classList.remove('hidden-view');
-        }
-
-        async function submitPayment() {
-            const amount = document.getElementById('pay-amount').value;
-            const ref = document.getElementById('pay-ref').value;
-            if (!amount || !ref) return showToast('Fill all fields');
-
-            const res = await callAPI('submitPayment', { phone: currentUser.phone, amount, reference: ref });
+        async function loadLandmarksForPassenger() {
+            const res = await callAPI('getLandmarks');
+            const select = document.getElementById('p-filter-landmark');
+            select.innerHTML = '<option value="">Select Nearby Landmark...</option>';
             if (res.status === 'success') {
-                showToast('Payment submitted for Admin approval!');
-                closeModal('modal-payment');
-            }
-        }
-
-        function handleRideResponse(accepted) {
-            if (accepted) {
-                callAPI('acceptRide', { rideId: activeRideId, driverPhone: currentUser.phone }).then(res => {
-                    if (res.status === 'success') {
-                        showToast('Ride Accepted! Fee applied.');
-                        document.getElementById('driver-ride-alert').classList.add('hidden');
-                        let currentOwed = parseFloat(document.getElementById('driver-owed').innerText) || 0;
-                        document.getElementById('driver-owed').innerText = (currentOwed + 0.50).toFixed(2);
-                    }
+                res.landmarks.forEach(lm => {
+                    const opt = document.createElement('option');
+                    opt.value = JSON.stringify({lat: lm.lat, lng: lm.lng, name: lm.name});
+                    opt.innerText = lm.name;
+                    select.appendChild(opt);
                 });
-            } else {
-                document.getElementById('driver-ride-alert').classList.add('hidden');
-                showToast('Ride Refused');
             }
         }
 
-        function searchDrivers() {
-            const vType = document.getElementById('p-filter-type').value;
-            showToast('Searching nearby drivers...');
-            
-            const list = document.getElementById('driver-list');
-            list.innerHTML = '';
-            
-            // Mock data for demonstration since backend might not have drivers yet
-            const mockDrivers = [
-                { brandName: "Kofi Express", vehicleType: "2 Tyres", photoURL: "https://via.placeholder.com/50", workPhone: "0241111111" },
-                { brandName: "Ama Taxis", vehicleType: "4 Tyres", photoURL: "https://via.placeholder.com/50", workPhone: "0242222222" }
-            ];
+        async function searchDrivers() {
+            try {
+                await getCurrentLocation(); // Get REAL GPS
+                
+                const landmarkVal = document.getElementById('p-filter-landmark').value;
+                const vType = document.getElementById('p-filter-type').value;
+                
+                let searchLat = userLat;
+                let searchLng = userLng;
 
-            mockDrivers.forEach((d) => {
-                if (!vType || d.vehicleType === vType) {
-                    const mockDist = (Math.random() * 5 + 0.5).toFixed(1);
-                    const card = document.createElement('div');
-                    card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 tap-anim';
-                    card.innerHTML = `
-                        <img src="${d.photoURL}" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-100">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-slate-800">${d.brandName}</h4>
-                            <p class="text-xs text-slate-500">${d.vehicleType} • ${mockDist} km away</p>
-                            <div class="flex text-amber-400 text-xs mt-1">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
-                            </div>
-                        </div>
-                        <button onclick="requestRide('DRV-001', '${d.brandName}', '${d.workPhone}')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">Book</button>
-                    `;
-                    list.appendChild(card);
+                if (landmarkVal) {
+                    const lm = JSON.parse(landmarkVal);
+                    searchLat = lm.lat;
+                    searchLng = lm.lng;
+                    showToast(`Searching near: ${lm.name}`);
+                } else {
+                    showToast("Searching near your exact GPS location...");
                 }
-            });
+
+                // For MVP, we fetch all drivers and filter client-side (Apps Script doesn't have complex spatial query)
+                const res = await callAPI('getAllDrivers'); 
+                const list = document.getElementById('driver-list');
+                list.innerHTML = '';
+
+                if (res.status === 'success') {
+                    const availableDrivers = res.drivers.filter(d => d.status === 'Online-Available' && d.isApproved === true);
+                    
+                    if (availableDrivers.length === 0) {
+                        list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">No drivers currently online.</p>';
+                        return;
+                    }
+
+                    // Sort by distance (Haversine)
+                    availableDrivers.sort((a, b) => {
+                        // Mocking driver locations for MVP distance calc. In production, drivers send GPS pings.
+                        const distA = getDistanceFromLatLonInKm(searchLat, searchLng, searchLat + (Math.random()*0.01), searchLng + (Math.random()*0.01));
+                        const distB = getDistanceFromLatLonInKm(searchLat, searchLng, searchLat + (Math.random()*0.01), searchLng + (Math.random()*0.01));
+                        return distA - distB;
+                    });
+
+                    availableDrivers.forEach(d => {
+                        if (!vType || d.vehicleType === vType) {
+                            const card = document.createElement('div');
+                            card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 tap-anim';
+                            card.innerHTML = `
+                                <img src="${d.photoURL}" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-100">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-slate-800">${d.brandName}</h4>
+                                    <p class="text-xs text-slate-500">${d.vehicleType} • Online</p>
+                                </div>
+                                <button onclick="requestRide('${d.phone}', '${d.brandName}', '${d.workPhone}')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold">Book</button>
+                            `;
+                            list.appendChild(card);
+                        }
+                    });
+                }
+            } catch (err) {
+                showToast(err);
+            }
         }
 
-        function toggleMapView() {
-            const isMap = document.getElementById('toggle-map').checked;
-            const mapContainer = document.getElementById('map-container');
-            if (isMap) {
-                mapContainer.classList.remove('hidden-view');
-                setTimeout(() => {
-                    if (!mapInstance) {
-                        mapInstance = L.map('map').setView([6.6885, -1.6244], 13);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
-                    }
-                    mapInstance.invalidateSize();
-                }, 100);
-            } else {
-                mapContainer.classList.add('hidden-view');
-            }
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            var R = 6371; 
+            var dLat = (lat2 - lat1) * (Math.PI / 180);
+            var dLon = (lon2 - lon1) * (Math.PI / 180);
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
         }
 
         function requestRide(driverPhone, brandName, workPhone) {
             activeRideId = 'RIDE-' + Math.floor(Math.random() * 10000);
             document.getElementById('booking-step-1').classList.remove('hidden');
             document.getElementById('booking-step-2').classList.add('hidden');
-            document.getElementById('booking-step-3').classList.add('hidden');
             document.getElementById('modal-booking').classList.remove('hidden-view');
 
             setTimeout(() => {
@@ -602,121 +520,151 @@
                 document.getElementById('accepted-driver-name').innerText = `${brandName} Accepted!`;
                 document.getElementById('accepted-driver-phone').href = `tel:${workPhone}`;
                 showToast('Driver has accepted your ride!');
-            }, 2000);
+            }, 2500);
         }
 
-        function completeRideAndRate() {
-            document.getElementById('booking-step-2').classList.add('hidden');
-            document.getElementById('booking-step-3').classList.remove('hidden');
+        async function toggleDriverStatus() {
+            const btn = document.getElementById('driver-status-btn');
+            const txt = document.getElementById('driver-status-text');
+            const isOnline = btn.innerText === 'GO ONLINE';
+            
+            const newStatus = isOnline ? 'Online-Available' : 'Offline';
+            btn.innerText = isOnline ? 'GO OFFLINE' : 'GO ONLINE';
+            btn.className = isOnline ? 'w-full py-3 rounded-xl font-bold text-lg tap-anim bg-red-500 text-white' : 'w-full py-3 rounded-xl font-bold text-lg tap-anim bg-slate-300 text-slate-600';
+            txt.innerText = isOnline ? 'Currently Online & Available' : 'Currently Offline';
+            
+            await callAPI('updateDriverStatus', { phone: currentUser.phone, status: newStatus });
+            showToast(isOnline ? 'You are now ONLINE' : 'You are now OFFLINE');
         }
 
-        function setRating(stars) {
-            currentRating = stars;
-            const starIcons = document.getElementById('star-rating').children;
-            for (let i = 0; i < 5; i++) {
-                if (i < stars) starIcons[i].classList.replace('text-slate-300', 'text-amber-400');
-                else starIcons[i].classList.replace('text-amber-400', 'text-slate-300');
+        function showPaymentModal() { document.getElementById('modal-payment').classList.remove('hidden-view'); }
+
+        async function submitPayment() {
+            const amount = document.getElementById('pay-amount').value;
+            const ref = document.getElementById('pay-ref').value;
+            if (!amount || !ref) return showToast('Fill all fields');
+            const res = await callAPI('submitPayment', { phone: currentUser.phone, amount, reference: ref });
+            if (res.status === 'success') {
+                showToast('Payment submitted for Admin approval!');
+                closeModal('modal-payment');
             }
         }
 
-        function submitRating() {
-            showToast(`Rated ${currentRating} stars. Thank you!`);
-            closeModal('modal-booking');
+        async function loadAdminDrivers() {
+            const res = await callAPI('getAllDrivers');
+            const list = document.getElementById('admin-driver-list');
+            list.innerHTML = '';
+            
+            if (res.status === 'success') {
+                res.drivers.forEach(d => {
+                    const div = document.createElement('div');
+                    div.className = 'p-4 flex justify-between items-center hover:bg-slate-50 border-b';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-sm">${d.brandName || 'Unknown Brand'}</p>
+                            <p class="text-xs text-slate-500">${d.vehicleType} • ${d.phone}</p>
+                            <p class="text-xs ${d.isApproved ? 'text-emerald-600' : 'text-red-500'} font-bold">
+                                ${d.isApproved ? 'Approved' : 'Pending Approval'} | Owes: GHS ${d.totalOwed || 0}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveDriver('${d.phone}', true)" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">Approve</button>
+                            <button onclick="approveDriver('${d.phone}', false)" class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs font-bold">Reject</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        }
+
+        async function approveDriver(phone, isApproved) {
+            const res = await callAPI('updateDriverApproval', { phone, isApproved });
+            if (res.status === 'success') {
+                showToast(`Driver ${isApproved ? 'Approved' : 'Rejected'}`);
+                loadAdminDrivers(); // Refresh list
+            }
+        }
+
+        function getAdminLocation() {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('lm-lat').value = position.coords.latitude.toFixed(6);
+                    document.getElementById('lm-lng').value = position.coords.longitude.toFixed(6);
+                    showToast("GPS coordinates filled!");
+                },
+                () => showToast("Could not get location. Enable GPS.")
+            );
+        }
+
+        async function addLandmark() {
+            const name = document.getElementById('lm-name').value;
+            const lat = document.getElementById('lm-lat').value;
+            const lng = document.getElementById('lm-lng').value;
+            if(!name || !lat || !lng) return showToast('Fill all fields');
+            
+            const res = await callAPI('addLandmark', { name, lat, lng });
+            if (res.status === 'success') {
+                showToast('Landmark added!');
+                document.getElementById('lm-name').value = '';
+                document.getElementById('lm-lat').value = '';
+                document.getElementById('lm-lng').value = '';
+            }
+        }
+
+        async function sendBroadcast() {
+            const msg = document.getElementById('broadcast-msg').value;
+            if(!msg) return showToast('Type a message first');
+            const res = await callAPI('saveBroadcast', { message: msg });
+            if (res.status === 'success') {
+                showToast('Broadcast saved to database!');
+                document.getElementById('broadcast-msg').value = '';
+            }
         }
 
         function showAdminTab(tab) {
-            document.getElementById('admin-tab-drivers').classList.add('hidden-view');
-            document.getElementById('admin-tab-landmarks').classList.add('hidden-view');
-            document.getElementById('admin-tab-broadcast').classList.add('hidden-view');
+            ['drivers', 'landmarks', 'broadcast'].forEach(t => {
+                document.getElementById(`admin-tab-${t}`).classList.add('hidden-view');
+            });
             document.getElementById(`admin-tab-${tab}`).classList.remove('hidden-view');
         }
 
-        function loadAdminData() {
-            document.getElementById('stat-drivers').innerText = "12";
-            document.getElementById('stat-rides').innerText = "45";
-            document.getElementById('stat-pending').innerText = "3";
-            document.getElementById('stat-reports').innerText = "1";
-        }
-
-        function addLandmark() {
-            showToast('Landmark added successfully!');
-            document.getElementById('lm-name').value = '';
-            document.getElementById('lm-lat').value = '';
-            document.getElementById('lm-lng').value = '';
-        }
-
-        function sendBroadcast() {
-            const msg = document.getElementById('broadcast-msg').value;
-            if(!msg) return showToast('Type a message first');
-            showToast('Broadcast sent to all users!');
-            document.getElementById('broadcast-msg').value = '';
-        }
-
-        let gameInterval;
-        let score = 0;
-        let playerX = 135;
-        let obstacles = [];
-
+        // --- MINI GAME ---
+        let gameInterval, score = 0, playerX = 135, obstacles = [];
         function startGame() {
             document.getElementById('modal-game').classList.remove('hidden-view');
             initGame();
         }
-
         function initGame() {
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
-            score = 0;
-            playerX = 135;
-            obstacles = [];
+            score = 0; playerX = 135; obstacles = [];
             document.getElementById('game-score').innerText = score;
-
             if (gameInterval) clearInterval(gameInterval);
 
             canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                if (x < 150) playerX = Math.max(10, playerX - 40);
-                else playerX = Math.min(260, playerX + 40);
+                playerX = (e.clientX - rect.left < 150) ? Math.max(10, playerX - 40) : Math.min(260, playerX + 40);
             };
 
             gameInterval = setInterval(() => {
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(0, 0, 300, 400);
-
-                ctx.fillStyle = '#10b981';
-                ctx.fillRect(playerX, 350, 30, 40);
-
-                if (Math.random() < 0.05) {
-                    obstacles.push({ x: Math.random() * 270, y: -40 });
-                }
-
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, 300, 400);
+                ctx.fillStyle = '#10b981'; ctx.fillRect(playerX, 350, 30, 40);
+                if (Math.random() < 0.05) obstacles.push({ x: Math.random() * 270, y: -40 });
                 ctx.fillStyle = '#ef4444';
                 for (let i = 0; i < obstacles.length; i++) {
-                    let obs = obstacles[i];
-                    obs.y += 3;
-                    ctx.fillRect(obs.x, obs.y, 30, 40);
-
+                    let obs = obstacles[i]; obs.y += 3; ctx.fillRect(obs.x, obs.y, 30, 40);
                     if (obs.y > 310 && obs.y < 390 && Math.abs(obs.x - playerX) < 30) {
-                        clearInterval(gameInterval);
-                        showToast('Game Over! Score: ' + score);
+                        clearInterval(gameInterval); showToast('Game Over! Score: ' + score);
                     }
-
-                    if (obs.y > 400) {
-                        obstacles.splice(i, 1);
-                        i--;
-                        score++;
-                        document.getElementById('game-score').innerText = score;
-                    }
+                    if (obs.y > 400) { obstacles.splice(i, 1); i--; score++; document.getElementById('game-score').innerText = score; }
                 }
             }, 20);
         }
 
         window.onload = () => {
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
             const savedUser = localStorage.getItem('okagia_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                loadDashboard();
-            }
+            if (savedUser) { currentUser = JSON.parse(savedUser); loadDashboard(); }
         };
     </script>
 </body>
