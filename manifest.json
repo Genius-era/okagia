@@ -1,8 +1,9 @@
 {
   "name": "OKAGIA – Move Smart. Move Safe.",
   "short_name": "OKAGIA",
-  "description": "Ghana's Okada, Pragia & Taxi ride-hailing app. Zero friction, zero cost.",
-  "start_url": "/index.html",
+  "description": "Ghana's Okada, Pragia & Taxi ride-hailing app.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
@@ -10,14 +11,13 @@
   "categories": ["transportation", "utilities"],
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3097/3097180.png",
+      "src": "https://img.icons8.com/fluency/192/motorcycle.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
-    
-    
-      "src": "https://cdn-icons-png.flaticon.com/512/3097/3097180.png",
+    {
+      "src": "https://img.icons8.com/fluency/512/motorcycle.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -26,9 +26,7 @@
   "shortcuts": [
     {
       "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "url": "/index.html?role=Passenger",
-      "description": "Book an Okada or Taxi now"
+      "url": "./index.html?role=Passenger"
     }
   ]
 }
