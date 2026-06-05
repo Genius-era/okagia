@@ -2,100 +2,136 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <title>OKAGIA</title>
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="Ghana's Okada, Pragia & Taxi ride-hailing app. Move Smart. Move Safe.">
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    body            { font-family:'Outfit',sans-serif; background:#f8fafc; margin:0; }
-    .tap-anim       { transition:transform .1s; }
-    .tap-anim:active{ transform:scale(.95); }
-    .hidden-view    { display:none !important; }
-    .star-btn       { color:#d1d5db; cursor:pointer; font-size:1.5rem; transition:color .15s; }
-    .star-btn.lit   { color:#f59e0b; }
-    @keyframes pulse-green {
-      0%,100%{ box-shadow:0 0 0 0 rgba(16,185,129,.4); }
-      50%     { box-shadow:0 0 0 10px rgba(16,185,129,0); }
-    }
-    .online-pulse { animation:pulse-green 2s infinite; }
-    @keyframes slide-up {
-      from{ transform:translateY(40px); opacity:0; }
-      to  { transform:translateY(0);    opacity:1; }
-    }
-    .slide-up { animation:slide-up .3s ease; }
-    .ride-alert { background:linear-gradient(135deg,#0f172a,#064e3b); }
+    *{box-sizing:border-box}
+    body{font-family:'Outfit',sans-serif;background:#f8fafc;margin:0}
+    .hidden-view{display:none!important}
+    .tap{transition:transform .1s}.tap:active{transform:scale(.95)}
+
+    /* ── Animated road scene ── */
+    .scene{position:relative;height:130px;overflow:hidden;background:linear-gradient(to bottom,#38bdf8 55%,#64748b 55%,#475569 100%);border-radius:16px}
+    .scene .road-line{position:absolute;bottom:30px;height:4px;background:repeating-linear-gradient(to right,#f59e0b 0,#f59e0b 30px,transparent 30px,transparent 60px);width:200%;animation:roadScroll 1s linear infinite}
+    .scene .vh{position:absolute;bottom:18px;font-size:28px;animation-timing-function:linear;animation-iteration-count:infinite}
+    .vh.r1{animation:goRight 3.5s -1s}
+    .vh.r2{animation:goRight 5s -3s}
+    .vh.r3{animation:goRight 4.5s -2s}
+    .vh.l1{animation:goLeft  4s -0.5s}
+    .scene .walkers{position:absolute;bottom:72px;width:100%;display:flex;justify-content:space-around;font-size:22px}
+    .scene .cloud{position:absolute;top:6px;font-size:18px;animation:driftCloud 12s linear infinite}
+    .scene .cloud.c2{animation-delay:-6s}
+    @keyframes roadScroll{from{transform:translateX(0)}to{transform:translateX(-60px)}}
+    @keyframes goRight{from{left:-60px}to{left:110%}}
+    @keyframes goLeft {from{right:-60px}to{right:110%}}
+    @keyframes driftCloud{from{left:-40px}to{left:110%}}
+
+    /* ── Journey type cards ── */
+    .jcard{background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .15s}
+    .jcard:active{transform:scale(.95)}
+    .jcard.active{border-color:#10b981;background:#ecfdf5}
+    .jcard .jicon{font-size:26px;line-height:1}
+    .jcard .jlabel{font-size:10px;font-weight:700;color:#475569;margin-top:4px}
+
+    /* ── Tier badges ── */
+    .tier-standard{background:#e2e8f0;color:#475569}
+    .tier-express{background:#dbeafe;color:#1d4ed8}
+    .tier-premiomity{background:#fef3c7;color:#92400e}
+
+    /* ── Driver card status dot ── */
+    .dot-green{background:#10b981}.dot-amber{background:#f59e0b}.dot-gray{background:#94a3b8}
+
+    /* ── Pulse for online ── */
+    @keyframes pulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
+    .pulse-green{animation:pulseGreen 2s infinite}
+
+    /* ── Slide-up modal ── */
+    @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .slide-up{animation:slideUp .25s ease}
+
+    /* ── Path recording ── */
+    .recording-dot{width:10px;height:10px;background:#ef4444;border-radius:50%;display:inline-block;animation:pulseGreen .8s infinite}
+
+    /* ── Spinner ── */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{animation:spin 1s linear infinite;display:inline-block}
   </style>
 </head>
 <body class="text-slate-800 antialiased">
 
-<!-- ═══════════════ LANDING PAGE ═══════════════ -->
+<!-- ═══════════ LANDING ═══════════ -->
 <div id="view-landing" class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 text-white">
-
-  <div id="logo-trigger" class="tap-anim cursor-pointer mb-10 text-center select-none">
+  <div id="logo-trigger" class="tap cursor-pointer mb-8 text-center select-none">
     <i class="fa-solid fa-motorcycle text-6xl text-emerald-400 mb-3"></i>
     <h1 class="text-5xl font-extrabold tracking-tighter">OKAGIA</h1>
     <p class="text-slate-400 text-sm mt-1">Move Smart. Move Safe.</p>
   </div>
 
   <div class="w-full max-w-sm space-y-3">
-    <button onclick="showAuth('Passenger')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg tap-anim flex items-center justify-center gap-3 text-lg">
+    <button onclick="showAuth('Passenger')" class="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg tap flex items-center justify-center gap-3 text-lg">
       <i class="fa-solid fa-user"></i> I'm a Passenger
     </button>
-    <button onclick="showAuth('Driver')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-2xl shadow-lg tap-anim flex items-center justify-center gap-3 text-lg">
+    <button onclick="showAuth('Driver')" class="w-full bg-slate-700 text-white font-bold py-4 rounded-2xl shadow-lg tap flex items-center justify-center gap-3 text-lg">
       <i class="fa-solid fa-id-card"></i> I'm a Driver / Motorist
+    </button>
+    <button id="pwa-install-btn" onclick="installPWA()" class="hidden w-full bg-blue-600 text-white font-bold py-3 rounded-2xl tap flex items-center justify-center gap-2 text-sm">
+      <i class="fa-solid fa-download"></i> Install OKAGIA App
     </button>
   </div>
 
-  <!-- Weekly Leaderboard -->
-  <div id="leaderboard-section" class="w-full max-w-sm mt-8 hidden">
-    <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest text-center mb-3">⭐ Top Drivers This Week</p>
+  <!-- Best-rated leaderboard -->
+  <div id="leaderboard-section" class="hidden w-full max-w-sm mt-8">
+    <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest text-center mb-3">⭐ Best Rated Drivers</p>
     <div id="leaderboard-list" class="space-y-2"></div>
   </div>
 
   <button onclick="startGame()" class="mt-10 text-slate-500 text-xs flex items-center gap-2 hover:text-emerald-400 transition">
     <i class="fa-solid fa-gamepad"></i> Play Okada Dodge
   </button>
-  <p id="admin-tap-target" class="mt-6 text-[10px] text-slate-800 select-none cursor-pointer">v2.0.0 build</p>
+  <p id="admin-tap-target" class="mt-6 text-[10px] text-slate-800 select-none cursor-pointer">v3.0.0 build</p>
 </div>
 
-<!-- ═══════════════ AUTH PAGE ═══════════════ -->
+<!-- ═══════════ AUTH ═══════════ -->
 <div id="view-auth" class="hidden-view min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
   <div class="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl">
-    <h2 id="auth-title" class="text-2xl font-bold mb-6 text-slate-800">Passenger Login</h2>
-
-    <!-- Single name + phone (used for both login & signup) -->
+    <h2 id="auth-title" class="text-2xl font-bold mb-5 text-slate-800">Passenger Login</h2>
     <div class="space-y-3">
       <input type="text" id="user-name"  placeholder="Your Full Name"
-             class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
-      <input type="tel"  id="user-phone" placeholder="Phone Number (e.g. 024XXXXXXX)"
-             class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+             class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-400">
+      <input type="tel"  id="user-phone" placeholder="Phone  e.g. 024XXXXXXX"
+             class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-400">
 
-      <!-- Driver-only signup fields (hidden by default) -->
-      <div id="driver-signup-fields" class="hidden space-y-3 pt-2 border-t border-slate-100">
-        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Driver Details</p>
-        <input type="text" id="reg-brand"    placeholder="Brand / Business Name"
-               class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+      <!-- Driver signup extras -->
+      <div id="driver-signup-fields" class="hidden space-y-3 pt-3 border-t border-slate-100">
+        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Driver Details</p>
+        <input type="text" id="reg-brand"    placeholder="Brand / Business Name  e.g. Brothers Fast Rides"
+               class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-400">
         <select id="reg-vehicle" class="w-full p-3 border border-slate-200 rounded-xl outline-none bg-white">
-          <option value="2 Tyres">🏍️ 2 Tyres (Okada)</option>
-          <option value="3 Tyres">🛺 3 Tyres (Pragia / Aboboyaa)</option>
-          <option value="4 Tyres">🚕 4 Tyres (Taxi)</option>
+          <option value="2 Tyres">🏍️  2 Tyres — Okada</option>
+          <option value="3 Tyres">🛺  3 Tyres — Pragia / Aboboyaa</option>
+          <option value="4 Tyres">🚕  4 Tyres — Taxi</option>
         </select>
-        <input type="tel" id="reg-workphone" placeholder="Work Phone (shown to passengers)"
-               class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+        <select id="reg-tier" class="w-full p-3 border border-slate-200 rounded-xl outline-none bg-white">
+          <option value="Standard">Standard — Regular Service</option>
+          <option value="Express">Express ⚡ — Premium Service</option>
+          <option value="Premiomity">Premiomity 👑 — Private Charter</option>
+        </select>
+        <input type="tel" id="reg-workphone" placeholder="Work Phone  (passengers will call this)"
+               class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-400">
         <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-800">
           <i class="fa-solid fa-circle-info mr-1"></i>
-          You are charged <b>0.50 GHS</b> (2/3 tyres) or <b>1.00 GHS</b> (4 tyres)
-          <b>only</b> when you go Online AND accept a passenger.
+          Charged <b>0.50 GHS</b> (2/3 tyres) or <b>1.00 GHS</b> (4 tyres) only when you're Online AND accept a ride.
         </div>
       </div>
     </div>
 
-    <button onclick="handleAuth()" id="auth-btn"
-            class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl mt-5 tap-anim text-base">Login</button>
+    <button id="auth-btn" onclick="handleAuth()"
+            class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl mt-5 tap text-base">Login</button>
     <p id="auth-toggle" onclick="toggleAuthMode()"
        class="text-center text-sm text-slate-500 mt-4 cursor-pointer hover:text-emerald-600">New user? Sign Up</p>
     <button onclick="showView('view-landing')"
@@ -103,102 +139,146 @@
   </div>
 </div>
 
-<!-- ═══════════════ MAIN APP ═══════════════ -->
+<!-- ═══════════ MAIN APP ═══════════ -->
 <div id="view-app" class="hidden-view min-h-screen bg-slate-50 pb-24">
 
-  <!-- Sticky Header -->
   <header class="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md">
     <div class="flex justify-between items-center max-w-4xl mx-auto">
       <div class="flex items-center gap-2">
         <i class="fa-solid fa-motorcycle text-emerald-400 text-xl"></i>
-        <span class="font-bold text-lg tracking-tight">OKAGIA</span>
+        <span class="font-bold text-lg">OKAGIA</span>
       </div>
       <div class="flex items-center gap-3">
         <span id="user-display-name" class="text-sm text-slate-300 hidden sm:block"></span>
-        <button onclick="logout()" class="text-slate-400 hover:text-white p-2">
-          <i class="fa-solid fa-right-from-bracket"></i>
-        </button>
+        <button onclick="logout()" class="text-slate-400 hover:text-white p-2"><i class="fa-solid fa-right-from-bracket"></i></button>
       </div>
     </div>
   </header>
 
-  <!-- Broadcast Banner -->
   <div id="welcome-banner" class="hidden bg-emerald-600 text-white px-4 py-3 text-center text-sm font-medium">
-    <i class="fa-solid fa-bullhorn mr-2"></i><span id="welcome-msg-text">Welcome to OKAGIA!</span>
+    <i class="fa-solid fa-bullhorn mr-2"></i><span id="welcome-msg-text"></span>
   </div>
 
-  <!-- ── PASSENGER DASHBOARD ────────────────────────────────────── -->
+  <!-- ── PASSENGER DASHBOARD ────────────── -->
   <div id="dash-passenger" class="hidden-view max-w-4xl mx-auto p-4 space-y-4">
 
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-      <h3 class="font-bold text-slate-800 mb-3">Find a Ride</h3>
+    <!-- Animated road scene -->
+    <div class="scene shadow-sm">
+      <div class="cloud c1">⛅</div>
+      <div class="cloud c2">☀️</div>
+      <div class="walkers">
+        <span title="Bank/Office">💼</span>
+        <span title="School Children">🎒</span>
+        <span title="Market Run">🛍️</span>
+        <span title="Medical">👩‍⚕️</span>
+        <span title="Passenger">🙋</span>
+      </div>
+      <div class="road-line"></div>
+      <div class="vh r1">🏍️</div>
+      <div class="vh r2">🛺</div>
+      <div class="vh l1">🚕</div>
+      <div class="vh r3" style="bottom:52px;font-size:20px">🏍️</div>
+    </div>
 
-      <div class="space-y-2 mb-3">
-        <select id="p-pickup-landmark" onchange="updateFareEstimate()"
-                class="w-full p-3 border rounded-xl text-sm bg-white">
-          <option value="">📍 Pickup: Use My GPS Location</option>
-        </select>
-        <select id="p-dropoff-landmark" onchange="updateFareEstimate()"
-                class="w-full p-3 border rounded-xl text-sm bg-white">
-          <option value="">🏁 Dropoff Landmark (optional)</option>
-        </select>
-        <select id="p-filter-type" class="w-full p-3 border rounded-xl text-sm bg-white">
-          <option value="">All Vehicles</option>
-          <option value="2 Tyres">🏍️ 2 Tyres (Okada)</option>
-          <option value="3 Tyres">🛺 3 Tyres (Pragia)</option>
-          <option value="4 Tyres">🚕 4 Tyres (Taxi)</option>
+    <!-- Journey type quick-select -->
+    <div>
+      <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">What's your journey?</p>
+      <div class="grid grid-cols-4 gap-2">
+        <div class="jcard" onclick="selectJourney('4 Tyres','Work / Bank')">
+          <div class="jicon">💼</div><div class="jlabel">Work</div>
+        </div>
+        <div class="jcard" onclick="selectJourney('2 Tyres','Quick Ride')">
+          <div class="jicon">🏍️</div><div class="jlabel">Okada</div>
+        </div>
+        <div class="jcard" onclick="selectJourney('3 Tyres','Market Run')">
+          <div class="jicon">🛺</div><div class="jlabel">Pragia</div>
+        </div>
+        <div class="jcard" onclick="selectJourney('4 Tyres','School Run')">
+          <div class="jicon">🎓</div><div class="jlabel">School</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search controls -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+
+      <!-- Search mode tabs -->
+      <div class="flex gap-2 mb-3 overflow-x-auto pb-1">
+        <button id="mode-btn-nearby"   onclick="setSearchMode('nearby')"
+                class="mode-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap bg-slate-900 text-white">
+          📍 Near Me
+        </button>
+        <button id="mode-btn-landmark" onclick="setSearchMode('landmark')"
+                class="mode-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap bg-white text-slate-600 border">
+          🏛️ By Landmark
+        </button>
+        <button id="mode-btn-tier"     onclick="setSearchMode('tier')"
+                class="mode-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap bg-white text-slate-600 border">
+          ⭐ By Service
+        </button>
+      </div>
+
+      <!-- Landmark picker (hidden unless mode = landmark) -->
+      <div id="landmark-picker" class="hidden mb-3">
+        <select id="p-landmark" class="w-full p-3 border rounded-xl text-sm bg-white">
+          <option value="">Select a Landmark...</option>
         </select>
       </div>
 
-      <!-- Fare Estimate Card -->
-      <div id="fare-estimate" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-xl mb-3 text-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-emerald-700 font-bold" id="fare-estimate-text">Est. Fare: —</span>
-          <span class="text-emerald-500 text-xs" id="fare-distance-text"></span>
+      <!-- Tier picker (hidden unless mode = tier) -->
+      <div id="tier-picker" class="hidden mb-3">
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="selectTier('Standard')"   class="tier-btn tier-standard px-2 py-2 rounded-xl text-xs font-bold tap">Standard</button>
+          <button onclick="selectTier('Express')"    class="tier-btn tier-express  px-2 py-2 rounded-xl text-xs font-bold tap">Express ⚡</button>
+          <button onclick="selectTier('Premiomity')" class="tier-btn tier-premiomity px-2 py-2 rounded-xl text-xs font-bold tap">Premiomity 👑</button>
         </div>
       </div>
 
+      <!-- Vehicle type filter -->
+      <select id="p-filter-type" class="w-full p-3 border rounded-xl text-sm bg-white mb-3">
+        <option value="">All Vehicles</option>
+        <option value="2 Tyres">🏍️  2 Tyres (Okada)</option>
+        <option value="3 Tyres">🛺  3 Tyres (Pragia)</option>
+        <option value="4 Tyres">🚕  4 Tyres (Taxi)</option>
+      </select>
+
       <button onclick="searchDrivers()"
-              class="w-full bg-slate-900 text-white rounded-xl font-bold py-3 tap-anim flex items-center justify-center gap-2">
-        <i class="fa-solid fa-location-crosshairs"></i> Search Nearby Drivers
+              class="w-full bg-slate-900 text-white rounded-xl font-bold py-3 tap flex items-center justify-center gap-2">
+        <i class="fa-solid fa-magnifying-glass"></i> Find Drivers
       </button>
     </div>
 
-    <div id="driver-list" class="space-y-3">
-      <p class="text-center text-slate-400 text-sm py-8">Tap Search to find available drivers near you.</p>
+    <!-- Driver list -->
+    <div id="driver-list">
+      <p class="text-center text-slate-400 text-sm py-10">Tap Find Drivers to see who's available near you.</p>
     </div>
   </div>
 
-  <!-- ── DRIVER DASHBOARD ───────────────────────────────────────── -->
+  <!-- ── DRIVER DASHBOARD ───────────────── -->
   <div id="dash-driver" class="hidden-view max-w-4xl mx-auto p-4 space-y-4">
 
-    <!-- Status + Wallet row -->
+    <!-- Status + Wallet -->
     <div class="grid grid-cols-2 gap-4">
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center">
-        <p class="text-slate-500 text-xs mb-2 uppercase tracking-wide">Status</p>
+        <p class="text-slate-500 text-xs uppercase tracking-wide mb-2">My Status</p>
         <button id="driver-status-btn" onclick="toggleDriverStatus()" data-current="Offline"
-                class="w-full py-3 rounded-xl font-bold text-sm tap-anim bg-slate-200 text-slate-600">
-          GO ONLINE
-        </button>
+                class="w-full py-3 rounded-xl font-bold text-sm tap bg-slate-200 text-slate-600">GO ONLINE</button>
         <p id="driver-status-text" class="text-xs text-slate-400 mt-2">💤 Offline</p>
       </div>
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center">
-        <p class="text-slate-500 text-xs mb-1 uppercase tracking-wide">Amount Owed</p>
+        <p class="text-slate-500 text-xs uppercase tracking-wide mb-1">Amount Owed</p>
         <p class="text-2xl font-extrabold text-red-500 mt-1">GHS <span id="driver-owed">—</span></p>
         <button onclick="showModal('modal-payment')"
-                class="mt-2 text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold tap-anim">
-          Pay Now
-        </button>
+                class="mt-2 text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold tap">Pay Now</button>
       </div>
     </div>
 
-    <!-- Active ride banner (shown when Online-Busy) -->
-    <div id="active-ride-banner" class="hidden ride-alert text-white p-4 rounded-2xl shadow-lg slide-up">
-      <p class="text-xs text-emerald-400 font-bold uppercase tracking-wide mb-1">🚗 Active Ride</p>
-      <p class="text-sm"><b>Pickup:</b> <span id="active-ride-pickup">—</span></p>
+    <!-- Active ride banner -->
+    <div id="active-ride-banner" class="hidden bg-gradient-to-br from-slate-900 to-emerald-900 text-white p-4 rounded-2xl shadow-lg slide-up">
+      <p class="text-xs text-emerald-400 font-bold uppercase mb-1">🚗 Active Ride</p>
+      <p class="text-sm"><b>Pickup:</b>  <span id="active-ride-pickup">—</span></p>
       <p class="text-sm"><b>Dropoff:</b> <span id="active-ride-dropoff">—</span></p>
-      <button onclick="completeMyRide()"
-              class="w-full mt-3 bg-emerald-500 text-white py-2 rounded-xl font-bold text-sm tap-anim">
+      <button onclick="completeMyRide()" class="w-full mt-3 bg-emerald-500 text-white py-2 rounded-xl font-bold text-sm tap">
         ✅ Mark Ride Complete
       </button>
     </div>
@@ -207,61 +287,60 @@
     <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
       <h3 class="font-bold text-slate-800 mb-3">My Profile</h3>
       <div class="flex items-center gap-4 mb-3">
-        <div class="relative">
-          <img id="driver-profile-photo" src="https://placehold.co/80x80/10b981/ffffff?text=🛵"
-               class="w-16 h-16 rounded-full object-cover border-2 border-emerald-200">
+        <div class="relative shrink-0">
+          <img id="driver-profile-photo" src="https://placehold.co/80x80/10b981/fff?text=🛵"
+               class="w-16 h-16 rounded-full object-cover border-2 border-emerald-200"
+               onerror="this.src='https://placehold.co/80x80/10b981/fff?text=?'">
           <label for="photo-input"
-                 class="absolute -bottom-1 -right-1 bg-slate-900 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer text-xs">
+                 class="absolute -bottom-1 -right-1 bg-slate-800 text-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer text-xs shadow">
             <i class="fa-solid fa-camera"></i>
           </label>
           <input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
         </div>
-        <div>
-          <p id="driver-brand-display" class="font-bold text-slate-800">—</p>
+        <div class="min-w-0">
+          <p id="driver-brand-display" class="font-bold text-slate-800 truncate">—</p>
           <p id="driver-type-display"  class="text-xs text-slate-500">—</p>
-          <p id="my-approval" class="text-xs font-bold text-amber-600 mt-1">⏳ Pending Approval</p>
+          <p id="driver-tier-display"  class="text-xs font-bold mt-0.5">—</p>
+          <p id="my-approval" class="text-xs font-bold text-amber-600 mt-0.5">⏳ Pending Approval</p>
         </div>
       </div>
-      <!-- Share profile / status card -->
       <div class="flex gap-2">
-        <button onclick="copyDriverLink()" class="flex-1 text-xs bg-slate-100 text-slate-600 py-2 rounded-xl font-bold tap-anim">
+        <button onclick="copyDriverLink()"      class="flex-1 text-xs bg-slate-100 text-slate-600 py-2 rounded-xl font-bold tap">
           <i class="fa-solid fa-link mr-1"></i> Share Profile
         </button>
-        <button onclick="generateStatusCard()" class="flex-1 text-xs bg-emerald-50 text-emerald-700 py-2 rounded-xl font-bold tap-anim">
-          <i class="fa-brands fa-whatsapp mr-1"></i> WA Status Card
+        <button onclick="generateStatusCard()" class="flex-1 text-xs bg-emerald-50 text-emerald-700 py-2 rounded-xl font-bold tap">
+          <i class="fa-brands fa-whatsapp mr-1"></i> WA Card
         </button>
       </div>
     </div>
 
     <!-- Telegram link -->
     <button onclick="linkTelegram()"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-xl font-bold tap-anim flex items-center justify-center gap-2">
+            class="w-full bg-blue-500 text-white p-3 rounded-xl font-bold tap flex items-center justify-center gap-2">
       <i class="fa-brands fa-telegram text-lg"></i> Link Telegram for Ride Alerts
     </button>
 
-    <!-- WhatsApp Admin -->
+    <!-- Contact Admin via WhatsApp -->
     <a id="wa-admin-link" href="#" target="_blank"
-       class="block bg-green-500 text-white p-3 rounded-xl text-center font-bold tap-anim">
+       class="block bg-green-500 text-white p-3 rounded-xl text-center font-bold tap">
       <i class="fa-brands fa-whatsapp mr-2 text-xl"></i> Contact Admin via WhatsApp
     </a>
   </div>
 
-  <!-- ── ADMIN DASHBOARD ────────────────────────────────────────── -->
+  <!-- ── ADMIN DASHBOARD ─────────────────── -->
   <div id="dash-admin" class="hidden-view max-w-5xl mx-auto p-4 space-y-4">
-
-    <!-- Tab bar -->
     <div class="flex gap-2 overflow-x-auto pb-1">
-      <button onclick="showAdminTab('drivers')"  class="admin-tab-btn px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold whitespace-nowrap">Drivers</button>
-      <button onclick="showAdminTab('payments')" class="admin-tab-btn px-4 py-2 bg-white text-slate-700 rounded-lg text-sm font-bold whitespace-nowrap border">Payments</button>
-      <button onclick="showAdminTab('landmarks')"class="admin-tab-btn px-4 py-2 bg-white text-slate-700 rounded-lg text-sm font-bold whitespace-nowrap border">Landmarks</button>
-      <button onclick="showAdminTab('broadcast')"class="admin-tab-btn px-4 py-2 bg-white text-slate-700 rounded-lg text-sm font-bold whitespace-nowrap border">Broadcast</button>
+      <button onclick="showAdminTab('drivers')"  class="admin-tab-btn bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap">Drivers</button>
+      <button onclick="showAdminTab('payments')" class="admin-tab-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap border">Payments</button>
+      <button onclick="showAdminTab('landmarks')"class="admin-tab-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap border">Landmarks</button>
+      <button onclick="showAdminTab('broadcast')"class="admin-tab-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap border">Broadcast</button>
     </div>
 
     <!-- Drivers tab -->
     <div id="admin-tab-drivers" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
       <div class="p-3 border-b bg-slate-50 flex justify-between items-center">
         <h3 class="font-bold text-sm">Registered Drivers</h3>
-        <button onclick="loadAdminDrivers()" class="text-xs text-blue-600 font-bold">Refresh</button>
+        <button onclick="loadAdminDrivers()" class="text-xs text-blue-600 font-bold">↻ Refresh</button>
       </div>
       <div id="admin-driver-list" class="divide-y max-h-[70vh] overflow-y-auto">
         <p class="text-center text-slate-400 py-6 text-sm">Loading…</p>
@@ -271,59 +350,76 @@
     <!-- Payments tab -->
     <div id="admin-tab-payments" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
       <div class="p-3 border-b bg-slate-50 flex justify-between items-center">
-        <h3 class="font-bold text-sm">Payment Records</h3>
-        <button onclick="loadAdminPayments()" class="text-xs text-blue-600 font-bold">Refresh</button>
+        <h3 class="font-bold text-sm">Payments</h3>
+        <button onclick="loadAdminPayments()" class="text-xs text-blue-600 font-bold">↻ Refresh</button>
       </div>
       <div id="admin-payment-list" class="divide-y max-h-[70vh] overflow-y-auto">
         <p class="text-center text-slate-400 py-6 text-sm">Loading…</p>
       </div>
     </div>
 
-    <!-- Landmarks tab -->
-    <div id="admin-tab-landmarks" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-      <h3 class="font-bold mb-3">Add Landmark</h3>
-      <button onclick="getAdminLocation()"
-              class="w-full mb-3 bg-blue-100 text-blue-700 py-2 rounded-xl text-sm font-bold tap-anim flex items-center justify-center gap-2">
-        <i class="fa-solid fa-location-crosshairs"></i> Use My Current GPS
-      </button>
-      <div class="space-y-2 mb-3">
-        <input type="text"   id="lm-name" placeholder="Landmark Name (e.g. KNUST Main Gate)"
-               class="w-full p-3 border rounded-xl text-sm">
-        <div class="grid grid-cols-2 gap-2">
-          <input type="number" step="any" id="lm-lat" placeholder="Latitude"
-                 class="p-3 border rounded-xl text-sm">
-          <input type="number" step="any" id="lm-lng" placeholder="Longitude"
-                 class="p-3 border rounded-xl text-sm">
+    <!-- Landmarks tab — with path recording -->
+    <div id="admin-tab-landmarks" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+      <h3 class="font-bold">Add Landmark</h3>
+
+      <!-- Path recording UI -->
+      <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-sm">
+        <p class="font-bold text-blue-700 mb-2">📍 Record Accurate Path</p>
+        <p class="text-blue-600 text-xs mb-3">Walk or drive to the landmark while recording. This makes distance calculations accurate.</p>
+
+        <div id="path-idle">
+          <button onclick="startPathRecording()" class="w-full bg-blue-600 text-white py-2 rounded-xl font-bold text-sm tap">
+            🔴 Start Path Recording
+          </button>
         </div>
-        <button onclick="addLandmark()"
-                class="w-full bg-emerald-600 text-white rounded-xl text-sm font-bold py-3 tap-anim">
-          Save Landmark
-        </button>
+
+        <div id="path-recording" class="hidden">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="recording-dot"></span>
+            <span class="text-red-600 font-bold text-sm">Recording path…</span>
+            <span id="waypoint-count" class="text-slate-600 text-xs">0 pts</span>
+          </div>
+          <p class="text-xs text-slate-600 mb-2" id="path-distance-live">Distance so far: 0.00 km</p>
+          <button onclick="stopPathRecording()" class="w-full bg-emerald-600 text-white py-2 rounded-xl font-bold text-sm tap">
+            ⏹️ I've Arrived — Save This Location
+          </button>
+        </div>
       </div>
+
+      <!-- Manual GPS fill -->
+      <button onclick="getAdminLocation()"
+              class="w-full bg-slate-100 text-slate-700 py-2 rounded-xl text-sm font-bold tap flex items-center justify-center gap-2">
+        <i class="fa-solid fa-location-crosshairs"></i> Or: Use My Current GPS Only
+      </button>
+
+      <input type="text" id="lm-name" placeholder="Landmark Name  e.g. KNUST Main Gate"
+             class="w-full p-3 border rounded-xl text-sm">
+      <div class="grid grid-cols-2 gap-2">
+        <input type="number" step="any" id="lm-lat" placeholder="Latitude"  class="p-3 border rounded-xl text-sm">
+        <input type="number" step="any" id="lm-lng" placeholder="Longitude" class="p-3 border rounded-xl text-sm">
+      </div>
+      <button onclick="saveLandmark()"
+              class="w-full bg-emerald-600 text-white rounded-xl font-bold py-3 tap">Save Landmark</button>
     </div>
 
     <!-- Broadcast tab -->
     <div id="admin-tab-broadcast" class="hidden-view bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
       <h3 class="font-bold mb-3">Broadcast Message</h3>
-      <textarea id="broadcast-msg" rows="4"
-                placeholder="Type your welcome or policy message here…"
+      <textarea id="broadcast-msg" rows="4" placeholder="Type a message for all users…"
                 class="w-full p-3 border rounded-xl text-sm mb-3"></textarea>
-      <button onclick="sendBroadcast()"
-              class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold tap-anim">Save & Broadcast</button>
+      <button onclick="sendBroadcast()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold tap">Save & Broadcast</button>
     </div>
   </div>
-</div><!-- end view-app -->
+</div>
 
-<!-- ═══════════════ MODALS ═══════════════ -->
+<!-- ═══════════ MODALS ═══════════ -->
 
 <!-- Admin Login -->
 <div id="modal-admin-login" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
   <div class="bg-white p-6 rounded-2xl w-full max-w-sm slide-up">
     <h3 class="font-bold text-lg mb-4">Admin Access</h3>
-    <input type="text"     id="admin-user" placeholder="Username" value="Okagia"
-           class="w-full p-3 border rounded-xl mb-3">
-    <input type="password" id="admin-pass" placeholder="Password"
-           class="w-full p-3 border rounded-xl mb-4">
+    <input type="text"     id="admin-user" value="Okagia" placeholder="Username" class="w-full p-3 border rounded-xl mb-3">
+    <input type="password" id="admin-pass" placeholder="Password"               class="w-full p-3 border rounded-xl mb-4">
     <div class="flex gap-2">
       <button onclick="closeModal('modal-admin-login')" class="flex-1 py-2 text-slate-500">Cancel</button>
       <button onclick="verifyAdmin()" class="flex-1 bg-slate-900 text-white py-2 rounded-xl font-bold">Login</button>
@@ -331,17 +427,30 @@
   </div>
 </div>
 
-<!-- Payment Submission -->
-<div id="modal-payment" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-  <div class="bg-white p-6 rounded-2xl w-full max-w-sm slide-up">
-    <h3 class="font-bold text-lg mb-4">Submit Payment Proof</h3>
-    <input type="number" id="pay-amount" placeholder="Amount Paid (GHS)"
-           class="w-full p-3 border rounded-xl mb-3">
-    <input type="text"   id="pay-ref"    placeholder="MoMo Reference / Transaction ID"
-           class="w-full p-3 border rounded-xl mb-4">
-    <div class="flex gap-2">
-      <button onclick="closeModal('modal-payment')" class="flex-1 py-2 text-slate-500">Cancel</button>
-      <button onclick="submitPayment()" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl font-bold">Submit</button>
+<!-- New Ride Alert (Driver) -->
+<div id="modal-new-ride" class="hidden-view fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-sm slide-up overflow-hidden">
+    <div class="bg-gradient-to-br from-slate-900 to-emerald-900 p-5 text-white text-center">
+      <div class="text-4xl mb-2">🛵</div>
+      <h3 class="font-bold text-xl">New Ride Request!</h3>
+      <p class="text-emerald-300 text-sm">Respond quickly</p>
+    </div>
+    <div class="p-5 space-y-2">
+      <div class="bg-slate-50 p-3 rounded-xl text-sm">
+        <p class="text-slate-400 text-xs font-bold uppercase mb-1">Pickup</p>
+        <p id="pending-ride-pickup" class="font-bold">—</p>
+      </div>
+      <div class="bg-slate-50 p-3 rounded-xl text-sm">
+        <p class="text-slate-400 text-xs font-bold uppercase mb-1">Dropoff</p>
+        <p id="pending-ride-dropoff" class="font-bold">—</p>
+      </div>
+      <input type="hidden" id="pending-ride-id">
+    </div>
+    <div class="flex gap-3 px-5 pb-5">
+      <button onclick="declineRideRequest()"
+              class="flex-1 bg-red-100 text-red-600 py-3 rounded-xl font-bold text-sm tap">Decline</button>
+      <button onclick="acceptRideRequest()"
+              class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold tap">Accept</button>
     </div>
   </div>
 </div>
@@ -352,13 +461,13 @@
 
     <!-- Step 1: Waiting -->
     <div id="booking-step-1">
-      <div class="animate-spin text-4xl mb-3">🔄</div>
+      <div class="spinner text-4xl mb-3">🔄</div>
       <h3 class="font-bold text-lg mb-1">Request Sent!</h3>
       <p id="booking-wait-msg" class="text-sm text-slate-500 mb-4">Waiting for driver to accept…</p>
-      <div class="w-full bg-slate-100 rounded-full h-2 mb-4">
-        <div id="booking-progress" class="bg-emerald-500 h-2 rounded-full w-0 transition-all duration-500"></div>
+      <div class="w-full bg-slate-100 rounded-full h-1.5 mb-4">
+        <div id="booking-progress" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width:5%"></div>
       </div>
-      <button onclick="cancelBooking()" class="w-full bg-red-100 text-red-600 py-2 rounded-xl font-bold text-sm">
+      <button onclick="cancelBooking()" class="w-full bg-red-50 text-red-600 py-2 rounded-xl font-bold text-sm">
         Cancel Request
       </button>
     </div>
@@ -366,17 +475,21 @@
     <!-- Step 2: Accepted -->
     <div id="booking-step-2" class="hidden">
       <i class="fa-solid fa-motorcycle text-5xl text-emerald-500 mb-3"></i>
-      <h3 id="accepted-driver-name" class="font-bold text-lg mb-1">Driver Accepted!</h3>
-      <p class="text-sm text-slate-500 mb-3">Call them to confirm your exact location:</p>
-      <a id="accepted-driver-phone" href="#"
-         class="block w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-2 tap-anim">
-        <i class="fa-solid fa-phone mr-2"></i> Call Driver
+      <h3 id="accepted-driver-name" class="font-bold text-lg mb-1">Driver is on the way!</h3>
+      <p class="text-sm text-slate-500 mb-3">Call or WhatsApp your driver:</p>
+      <a id="accepted-call-btn" href="#"
+         class="block w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-2 tap">
+        <i class="fa-solid fa-phone mr-2"></i> <span id="accepted-call-label">Call Driver</span>
       </a>
-      <button id="share-ride-btn" onclick="" class="w-full bg-blue-50 text-blue-700 py-2 rounded-xl font-bold text-sm mb-2 tap-anim">
+      <a id="accepted-wa-btn" href="#" target="_blank"
+         class="block w-full bg-green-500 text-white py-2 rounded-xl font-bold text-sm mb-2 tap">
+        <i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp Driver
+      </a>
+      <button onclick="shareMyRide()" class="w-full bg-blue-50 text-blue-700 py-2 rounded-xl font-bold text-sm mb-2 tap">
         <i class="fa-solid fa-shield-halved mr-1"></i> Share My Ride (Safety)
       </button>
-      <button onclick="showRatingStep()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-sm font-bold">
-        ✅ Ride Complete — Rate Driver
+      <button onclick="showBookingStep(3)" class="w-full bg-slate-100 text-slate-600 py-2 rounded-xl text-sm font-bold">
+        ✅ Ride Done — Rate Driver
       </button>
     </div>
 
@@ -384,25 +497,23 @@
     <div id="booking-step-3" class="hidden">
       <i class="fa-solid fa-star text-4xl text-amber-400 mb-3"></i>
       <h3 class="font-bold text-lg mb-1">Rate Your Driver</h3>
-      <p class="text-sm text-slate-500 mb-3">How was your ride?</p>
-      <div class="flex justify-center gap-2 mb-3" id="star-container">
-        <i class="fa-solid fa-star star-btn" onclick="setRating(1)" data-star="1"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(2)" data-star="2"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(3)" data-star="3"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(4)" data-star="4"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(5)" data-star="5"></i>
+      <div class="flex justify-center gap-2 mb-3">
+        <i class="fa-solid fa-star text-2xl text-slate-200 cursor-pointer star-btn" onclick="setRating(1)"></i>
+        <i class="fa-solid fa-star text-2xl text-slate-200 cursor-pointer star-btn" onclick="setRating(2)"></i>
+        <i class="fa-solid fa-star text-2xl text-slate-200 cursor-pointer star-btn" onclick="setRating(3)"></i>
+        <i class="fa-solid fa-star text-2xl text-slate-200 cursor-pointer star-btn" onclick="setRating(4)"></i>
+        <i class="fa-solid fa-star text-2xl text-slate-200 cursor-pointer star-btn" onclick="setRating(5)"></i>
       </div>
       <textarea id="ride-complaint" rows="2" placeholder="Any complaint? (optional)"
                 class="w-full p-2 border rounded-xl text-sm mb-3"></textarea>
-      <button onclick="submitRating()"
-              class="w-full bg-amber-500 text-white py-2 rounded-xl font-bold">Submit Rating</button>
+      <button onclick="submitRating()" class="w-full bg-amber-500 text-white py-2 rounded-xl font-bold">Submit</button>
     </div>
 
     <!-- Declined -->
     <div id="booking-step-declined" class="hidden">
       <i class="fa-solid fa-circle-xmark text-4xl text-red-400 mb-3"></i>
       <h3 class="font-bold text-lg mb-1">Ride Declined</h3>
-      <p class="text-sm text-slate-500 mb-4">The driver couldn't take your ride. Please book another.</p>
+      <p class="text-sm text-slate-500 mb-4">This driver couldn't take the ride. Please choose another.</p>
       <button onclick="closeModal('modal-booking')" class="w-full bg-slate-900 text-white py-2 rounded-xl font-bold">
         Try Another Driver
       </button>
@@ -410,99 +521,91 @@
   </div>
 </div>
 
-<!-- New Ride Alert (Driver) -->
-<div id="modal-new-ride" class="hidden-view fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl w-full max-w-sm slide-up overflow-hidden">
-    <div class="ride-alert p-5 text-white text-center">
-      <div class="text-4xl mb-2">🛵</div>
-      <h3 class="font-bold text-xl">New Ride Request!</h3>
-      <p class="text-emerald-300 text-sm mt-1">Respond quickly</p>
-    </div>
-    <div class="p-5 space-y-2">
-      <div class="bg-slate-50 p-3 rounded-xl text-sm">
-        <p class="text-slate-500 text-xs uppercase tracking-wide font-bold mb-1">Pickup</p>
-        <p id="pending-ride-pickup" class="font-bold text-slate-800">—</p>
-      </div>
-      <div class="bg-slate-50 p-3 rounded-xl text-sm">
-        <p class="text-slate-500 text-xs uppercase tracking-wide font-bold mb-1">Dropoff</p>
-        <p id="pending-ride-dropoff" class="font-bold text-slate-800">—</p>
-      </div>
-      <div class="bg-emerald-50 p-3 rounded-xl text-sm text-center">
-        <p class="text-slate-500 text-xs uppercase tracking-wide font-bold">Est. Fare</p>
-        <p id="pending-ride-fare" class="font-extrabold text-emerald-700 text-xl">GHS —</p>
-      </div>
-      <input type="hidden" id="pending-ride-id">
-    </div>
-    <div class="flex gap-3 px-5 pb-5">
-      <button onclick="declineRideRequest()"
-              class="flex-1 bg-red-100 text-red-600 py-3 rounded-xl font-bold text-sm tap-anim">Decline</button>
-      <button onclick="acceptRideRequest()"
-              class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold tap-anim">Accept Ride</button>
+<!-- Payment Modal -->
+<div id="modal-payment" class="hidden-view fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+  <div class="bg-white p-6 rounded-2xl w-full max-w-sm slide-up">
+    <h3 class="font-bold text-lg mb-4">Submit Payment Proof</h3>
+    <input type="number" id="pay-amount"  placeholder="Amount Paid (GHS)"       class="w-full p-3 border rounded-xl mb-3">
+    <input type="text"   id="pay-ref"     placeholder="MoMo Reference / TXN ID" class="w-full p-3 border rounded-xl mb-4">
+    <div class="flex gap-2">
+      <button onclick="closeModal('modal-payment')" class="flex-1 py-2 text-slate-500">Cancel</button>
+      <button onclick="submitPayment()" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl font-bold">Submit</button>
     </div>
   </div>
 </div>
 
-<!-- Mini Game -->
+<!-- Game Modal -->
 <div id="modal-game" class="hidden-view fixed inset-0 bg-slate-900 z-[120] flex flex-col items-center justify-center p-4">
   <div class="flex justify-between w-full max-w-xs mb-2 text-white">
     <span class="font-bold">Okada Dodge</span>
-    <button onclick="closeGame()" class="text-slate-400">✕ Close</button>
+    <button onclick="closeGame()" class="text-slate-400">✕</button>
     <span class="font-bold text-amber-400">Score: <span id="game-score">0</span></span>
   </div>
-  <canvas id="game-canvas" width="300" height="450"
-          class="bg-slate-800 rounded-xl border-2 border-slate-700"></canvas>
+  <canvas id="game-canvas" width="300" height="450" class="bg-slate-800 rounded-xl border-2 border-slate-700"></canvas>
   <p class="text-slate-500 text-xs mt-3">Tap left / right to move</p>
-  <button onclick="initGame()" class="mt-3 bg-emerald-500 text-white px-8 py-2 rounded-full font-bold tap-anim">
-    Start / Restart
-  </button>
+  <button onclick="initGame()" class="mt-3 bg-emerald-500 text-white px-8 py-2 rounded-full font-bold tap">Start / Restart</button>
 </div>
 
 <!-- Toast -->
-<div id="toast"
-     class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-2 rounded-full text-sm shadow-xl hidden z-[130]">
-</div>
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-2 rounded-full text-sm shadow-xl hidden z-[130] max-w-xs text-center"></div>
 
-<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CONFIGURATION — set these two
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const API_URL          = 'https://script.google.com/macros/s/AKfycbxs9GdVGlv1b6Thy_bDVGBR9ZcSwnk0sN6kaHiHOD84WfDyfjsW4OjDsyfW5c3xB0TL8A/exec';
-const TELEGRAM_BOT_NAME= '@Okagiabot'; // Set your bot @username (no @)
+// ── CONFIG — set these ──────────────────────────────
+const API_URL           = 'https://script.google.com/macros/s/AKfycbz-7brO-iD3MiWn6lnnBuWqI8sp9ffIBHHevZrGwHyxaRYs3zhFFtj39Byvz6JclLMP5A/exec';
+const TELEGRAM_BOT_NAME = '@Okagiabot';   // bot @username without @
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// STATE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── STATE ───────────────────────────────────────────
 let currentUser          = null;
 let driverProfile        = null;
 let appSettings          = {};
+let allLandmarks         = [];
 let authMode             = 'login';
 let selectedRole         = 'Passenger';
-let logoTapCount         = 0;
-let logoTapTimer         = null;
-let activeRideId         = null;    // passenger's current ride
-let driverActiveRideId   = null;    // driver's current accepted ride
-let ridePollingInterval  = null;    // driver polls for new requests
-let passengerPollInterval= null;    // passenger polls for acceptance
+let logoTapCount         = 0, logoTapTimer = null;
+let searchMode           = 'nearby';
+let selectedTier         = '';
+let activeRideId         = null;
+let activeDrvrWorkPhone  = '';
+let activeDrvrName       = '';
+let driverActiveRideId   = null;
+let ridePollingInterval  = null;
+let passengerPollInterval= null;
 let currentRating        = 0;
 let userLat = null, userLng = null;
-let allLandmarks         = [];
+let pathWaypoints        = [];
+let pathRecordingTimer   = null;
+let pwaInstallPrompt     = null;
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// UTILITIES
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── CORE API ────────────────────────────────────────
+// Uses POST with form-encoded body — handles large payloads (photos etc.)
+async function callAPI(action, data = {}) {
+  try {
+    const res = await fetch(API_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body:    'action=' + encodeURIComponent(action) +
+               '&data='  + encodeURIComponent(JSON.stringify(data))
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', message: 'Connection failed. Check network.' };
+  }
+}
+
+// ── UTILITIES ───────────────────────────────────────
 function showView(id) {
   document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden-view'));
   document.getElementById(id).classList.remove('hidden-view');
 }
 
-let toastTimer = null;
-function showToast(msg, duration = 3000) {
+let _toastTimer = null;
+function showToast(msg, ms = 3500) {
   const t = document.getElementById('toast');
-  t.innerText = msg;
-  t.classList.remove('hidden');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.add('hidden'), duration);
+  t.innerText = msg; t.classList.remove('hidden');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.add('hidden'), ms);
 }
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden-view'); }
@@ -513,36 +616,58 @@ function getCurrentLocation() {
     if (!navigator.geolocation) return reject('Geolocation not supported.');
     navigator.geolocation.getCurrentPosition(
       p  => { userLat = p.coords.latitude; userLng = p.coords.longitude; resolve({ lat: userLat, lng: userLng }); },
-      () => reject('Enable GPS and try again.'),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      () => reject('GPS failed. Please enable location access and try again.'),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
   });
 }
 
-async function callAPI(action, data = {}) {
-  try {
-    const url = `${API_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(data))}`;
-    const res = await fetch(url, { method: 'POST' });
-    return await res.json();
-  } catch (err) {
-    return { status: 'error', message: 'Network error. Check connection.' };
-  }
-}
-
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+// Haversine × 1.35 road factor (accounts for Ghana road network)
+function getRoadDistKm(lat1, lon1, lat2, lon2) {
   const R    = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a    = Math.sin(dLat/2)**2 +
-               Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a    = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a)) * 1.35;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// LANDING PAGE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function formatWAPhone(phone) {
+  // Ensure number is in 233XXXXXXXXX format for wa.me links
+  let p = String(phone || '').replace(/[\s\-\(\)\+]/g, '');
+  if (p.startsWith('0')) p = '233' + p.substring(1);
+  if (!p.startsWith('233')) p = '233' + p;
+  return p;
+}
+
+function getNearestLandmarkName(lat, lng) {
+  if (!lat || !lng || !allLandmarks.length) return null;
+  let nearest = null, best = Infinity;
+  allLandmarks.forEach(lm => {
+    const d = getRoadDistKm(lat, lng, lm.lat, lm.lng);
+    if (d < best) { best = d; nearest = lm; }
+  });
+  return nearest && best < 2.5 ? nearest.name : null;
+}
+
+// ── PWA ─────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  pwaInstallPrompt = e;
+  document.getElementById('pwa-install-btn').classList.remove('hidden');
+});
+
+function installPWA() {
+  if (!pwaInstallPrompt) return showToast('Already installed, or use your browser menu to install.');
+  pwaInstallPrompt.prompt();
+  pwaInstallPrompt.userChoice.then(r => {
+    if (r.outcome === 'accepted') showToast('OKAGIA installed! ✅');
+    pwaInstallPrompt = null;
+    document.getElementById('pwa-install-btn').classList.add('hidden');
+  });
+}
+
+// ── ADMIN EASTER EGG ────────────────────────────────
 function setupAdminTap() {
-  // 5 taps on logo OR version text within 2 seconds
   ['logo-trigger','admin-tap-target'].forEach(id => {
     document.getElementById(id).addEventListener('click', () => {
       logoTapCount++;
@@ -554,10 +679,9 @@ function setupAdminTap() {
 }
 
 function verifyAdmin() {
-  const u = document.getElementById('admin-user').value;
-  const p = document.getElementById('admin-pass').value;
-  if (u === 'Okagia' && p === 'password') {
-    currentUser = { name: 'Admin', role: 'Admin', phone: '000' };
+  if (document.getElementById('admin-user').value === 'Okagia' &&
+      document.getElementById('admin-pass').value === 'password') {
+    currentUser = { name:'Admin', role:'Admin', phone:'000' };
     closeModal('modal-admin-login');
     loadDashboard();
   } else {
@@ -565,38 +689,31 @@ function verifyAdmin() {
   }
 }
 
+// ── LEADERBOARD ─────────────────────────────────────
 async function loadLeaderboard() {
   const res = await callAPI('getLeaderboard');
   if (res.status !== 'success' || !res.leaderboard.length) return;
-
+  const medals  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
   const section = document.getElementById('leaderboard-section');
   const list    = document.getElementById('leaderboard-list');
   section.classList.remove('hidden');
-
-  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
   list.innerHTML = res.leaderboard.map((d, i) => {
     const stars = '⭐'.repeat(Math.round(d.avgRating || 0));
-    return `
-    <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+    return `<div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
       <span class="text-lg">${medals[i]}</span>
-      <div class="flex-1">
-        <p class="font-bold text-sm text-white">${d.brandName || 'Unknown'}</p>
-        <p class="text-xs text-slate-400">${d.vehicleType} • ${d.totalRatings} rating${d.totalRatings !== 1 ? 's' : ''}</p>
-      </div>
+      <div class="flex-1"><p class="font-bold text-sm text-white">${d.brandName||'Unknown'}</p>
+      <p class="text-xs text-slate-400">${d.vehicleType} • ${d.totalRatings} rating${d.totalRatings!==1?'s':''}</p></div>
       <span class="text-amber-400 font-bold text-sm">${parseFloat(d.avgRating).toFixed(1)} ${stars}</span>
-    </div>`
+    </div>`;
   }).join('');
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// AUTH
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── AUTH ─────────────────────────────────────────────
 function showAuth(role) {
-  selectedRole = role;
-  authMode     = 'login';
-  document.getElementById('auth-title').innerText      = `${role} Login`;
+  selectedRole = role; authMode = 'login';
+  document.getElementById('auth-title').innerText      = role + ' Login';
   document.getElementById('auth-btn').innerText        = 'Login';
-  document.getElementById('auth-toggle').innerText     = `New ${role}? Sign Up`;
+  document.getElementById('auth-toggle').innerText     = 'New ' + role + '? Sign Up';
   document.getElementById('driver-signup-fields').classList.add('hidden');
   document.getElementById('user-name').value  = '';
   document.getElementById('user-phone').value = '';
@@ -605,11 +722,11 @@ function showAuth(role) {
 
 function toggleAuthMode() {
   authMode = authMode === 'login' ? 'signup' : 'login';
-  const isSignup = authMode === 'signup';
-  document.getElementById('auth-title').innerText  = isSignup ? `${selectedRole} Sign Up` : `${selectedRole} Login`;
-  document.getElementById('auth-btn').innerText    = isSignup ? 'Create Account' : 'Login';
-  document.getElementById('auth-toggle').innerText = isSignup ? 'Already have an account? Login' : `New ${selectedRole}? Sign Up`;
-  document.getElementById('driver-signup-fields').classList.toggle('hidden', !(isSignup && selectedRole === 'Driver'));
+  const s  = authMode === 'signup';
+  document.getElementById('auth-title').innerText  = s ? selectedRole + ' Sign Up' : selectedRole + ' Login';
+  document.getElementById('auth-btn').innerText    = s ? 'Create Account' : 'Login';
+  document.getElementById('auth-toggle').innerText = s ? 'Already have an account? Login' : 'New ' + selectedRole + '? Sign Up';
+  document.getElementById('driver-signup-fields').classList.toggle('hidden', !(s && selectedRole === 'Driver'));
 }
 
 async function handleAuth() {
@@ -620,19 +737,16 @@ async function handleAuth() {
   if (authMode === 'signup') {
     const payload = { name, phone, role: selectedRole };
     if (selectedRole === 'Driver') {
-      payload.brandName   = document.getElementById('reg-brand').value.trim();
-      payload.vehicleType = document.getElementById('reg-vehicle').value;
-      payload.workPhone   = document.getElementById('reg-workphone').value.trim() || phone;
+      payload.brandName    = document.getElementById('reg-brand').value.trim();
+      payload.vehicleType  = document.getElementById('reg-vehicle').value;
+      payload.serviceTier  = document.getElementById('reg-tier').value;
+      payload.workPhone    = document.getElementById('reg-workphone').value.trim() || phone;
       if (!payload.brandName) return showToast('Please enter your brand name.');
     }
     showToast('Creating account…');
     const res = await callAPI('signup', payload);
-    if (res.status === 'success') {
-      showToast('Account created! Please login.');
-      toggleAuthMode();
-    } else {
-      showToast(res.message || 'Signup failed.');
-    }
+    if (res.status === 'success') { showToast('Account created! Please login.'); toggleAuthMode(); }
+    else showToast(res.message || 'Signup failed.');
   } else {
     showToast('Logging in…');
     const res = await callAPI('login', { phone });
@@ -649,113 +763,86 @@ async function handleAuth() {
 }
 
 function logout() {
-  stopDriverPolling();
-  stopPassengerPolling();
+  stopDriverPolling(); stopPassengerPolling();
   localStorage.removeItem('okagia_user');
-  currentUser       = null;
-  driverProfile     = null;
-  driverActiveRideId= null;
+  currentUser = driverProfile = null;
+  driverActiveRideId = null;
   showView('view-landing');
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DASHBOARD LOADER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── DASHBOARD LOADER ─────────────────────────────────
 async function loadDashboard() {
   showView('view-app');
   document.getElementById('user-display-name').innerText = currentUser.name;
   ['dash-passenger','dash-driver','dash-admin'].forEach(id =>
-    document.getElementById(id).classList.add('hidden-view')
-  );
+    document.getElementById(id).classList.add('hidden-view'));
 
-  // Load settings (needed by all roles)
-  const settingsRes = await callAPI('getSettings');
-  if (settingsRes.status === 'success') {
-    appSettings = settingsRes.settings;
-    const msg = appSettings.WelcomeMessage;
+  const sr = await callAPI('getSettings');
+  if (sr.status === 'success') {
+    appSettings = sr.settings;
+    const msg   = appSettings.WelcomeMessage;
     if (msg) {
       document.getElementById('welcome-msg-text').innerText = msg;
       document.getElementById('welcome-banner').classList.remove('hidden');
     }
   }
 
-  if (currentUser.role === 'Passenger') {
-    document.getElementById('dash-passenger').classList.remove('hidden-view');
-    loadLandmarksForPassenger();
-
-    // Handle deep-link: ?driver=PHONE
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('driver')) {
-      document.getElementById('p-filter-type').value = '';
-      await searchDrivers(params.get('driver'));
-    }
-
-  } else if (currentUser.role === 'Driver') {
-    document.getElementById('dash-driver').classList.remove('hidden-view');
-    await loadDriverDashboard();
-    startDriverPolling();
-
-  } else if (currentUser.role === 'Admin') {
-    document.getElementById('dash-admin').classList.remove('hidden-view');
-    loadAdminDrivers();
-  }
+  if      (currentUser.role === 'Passenger') { document.getElementById('dash-passenger').classList.remove('hidden-view'); loadPassengerData(); }
+  else if (currentUser.role === 'Driver')    { document.getElementById('dash-driver').classList.remove('hidden-view');   await loadDriverDashboard(); startDriverPolling(); }
+  else if (currentUser.role === 'Admin')     { document.getElementById('dash-admin').classList.remove('hidden-view');    loadAdminDrivers(); }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// PASSENGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function loadLandmarksForPassenger() {
+// ── PASSENGER ───────────────────────────────────────
+async function loadPassengerData() {
   const res = await callAPI('getLandmarks');
   if (res.status !== 'success') return;
   allLandmarks = res.landmarks;
-
-  ['p-pickup-landmark','p-dropoff-landmark'].forEach((selId, idx) => {
-    const sel = document.getElementById(selId);
-    const defaultOpt = idx === 0
-      ? '<option value="">📍 Pickup: Use My GPS Location</option>'
-      : '<option value="">🏁 Dropoff Landmark (optional)</option>';
-    sel.innerHTML = defaultOpt;
-    res.landmarks.forEach(lm => {
-      const opt = document.createElement('option');
-      opt.value     = JSON.stringify({ lat: lm.lat, lng: lm.lng, name: lm.name });
-      opt.innerText = lm.name;
-      sel.appendChild(opt);
-    });
+  const sel    = document.getElementById('p-landmark');
+  sel.innerHTML = '<option value="">Select a Landmark…</option>';
+  res.landmarks.forEach(lm => {
+    const o = document.createElement('option');
+    o.value     = JSON.stringify({ lat: lm.lat, lng: lm.lng, name: lm.name, pathDistance: lm.pathDistance });
+    o.innerText = lm.name;
+    sel.appendChild(o);
   });
+
+  // Deep-link: ?driver=PHONE
+  const dp = new URLSearchParams(window.location.search).get('driver');
+  if (dp) searchDrivers(dp);
 }
 
-function updateFareEstimate() {
-  const pickupVal  = document.getElementById('p-pickup-landmark').value;
-  const dropoffVal = document.getElementById('p-dropoff-landmark').value;
-  const vType      = document.getElementById('p-filter-type').value;
-  const fareCard   = document.getElementById('fare-estimate');
+function setSearchMode(mode) {
+  searchMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.className = 'mode-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ' +
+      (b.id === 'mode-btn-' + mode ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border');
+  });
+  document.getElementById('landmark-picker').classList.toggle('hidden', mode !== 'landmark');
+  document.getElementById('tier-picker').classList.toggle('hidden',     mode !== 'tier');
+}
 
-  if (!pickupVal || !dropoffVal) { fareCard.classList.add('hidden'); return; }
+function selectTier(tier) {
+  selectedTier = tier;
+  document.querySelectorAll('.tier-btn').forEach(b => b.style.opacity = '0.5');
+  event.currentTarget.style.opacity = '1';
+}
 
-  const pickup  = JSON.parse(pickupVal);
-  const dropoff = JSON.parse(dropoffVal);
-  const dist    = getDistanceFromLatLonInKm(pickup.lat, pickup.lng, dropoff.lat, dropoff.lng);
-
-  const baseFare  = parseFloat(appSettings.Fare_Base)  || 2.00;
-  const perKm     = parseFloat(appSettings.Fare_PerKm) || 1.50;
-  let   multiplier= 1.0;
-  if      (vType === '4 Tyres') multiplier = 1.5;
-  else if (vType === '3 Tyres') multiplier = 1.2;
-
-  const estimated = (baseFare + dist * perKm) * multiplier;
-  document.getElementById('fare-estimate-text').innerText = `Est. Fare: GHS ${estimated.toFixed(2)}`;
-  document.getElementById('fare-distance-text').innerText = `~${dist.toFixed(1)} km`;
-  fareCard.classList.remove('hidden');
+function selectJourney(vehicleType, label) {
+  document.getElementById('p-filter-type').value = vehicleType;
+  document.querySelectorAll('.jcard').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  showToast(label + ' selected');
 }
 
 async function searchDrivers(filterPhone = null) {
   let searchLat = userLat, searchLng = userLng;
-  const pickupVal = document.getElementById('p-pickup-landmark').value;
 
-  if (pickupVal) {
-    const lm = JSON.parse(pickupVal);
+  if (searchMode === 'landmark') {
+    const v = document.getElementById('p-landmark').value;
+    if (!v) return showToast('Please select a landmark.');
+    const lm = JSON.parse(v);
     searchLat = lm.lat; searchLng = lm.lng;
-    showToast(`Searching near: ${lm.name}`);
+    showToast('Searching near ' + lm.name + '…');
   } else {
     try {
       showToast('Getting your GPS location…');
@@ -771,134 +858,153 @@ async function searchDrivers(filterPhone = null) {
   const list = document.getElementById('driver-list');
   list.innerHTML = '';
 
-  if (res.status !== 'success') return (list.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm">Could not load drivers. Check connection.</p>');
-
-  const vType = document.getElementById('p-filter-type').value;
-  let drivers = res.drivers.filter(d => d.isApproved === true && d.status === 'Online-Available');
-  if (vType)       drivers = drivers.filter(d => d.vehicleType === vType);
-  if (filterPhone) drivers = drivers.filter(d => d.phone === filterPhone || d.phone.includes(filterPhone));
-
-  if (!drivers.length) {
-    list.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm">No drivers currently online. Try again shortly.</p>';
+  if (res.status !== 'success') {
+    list.innerHTML = '<p class="text-center text-slate-400 py-10 text-sm">Could not load drivers. Check connection.</p>';
     return;
   }
 
-  // Calculate real distances and sort
+  const vType = document.getElementById('p-filter-type').value;
+  let drivers  = res.drivers.filter(d => d.isApproved === true);
+  if (filterPhone) drivers = drivers.filter(d => String(d.phone).includes(filterPhone));
+  if (vType)       drivers = drivers.filter(d => d.vehicleType === vType);
+  if (searchMode === 'tier' && selectedTier) drivers = drivers.filter(d => d.serviceTier === selectedTier);
+
+  // Sort: available first, then by distance
   drivers = drivers.map(d => ({
     ...d,
-    distance: (d.lat && d.lng) ? getDistanceFromLatLonInKm(searchLat, searchLng, d.lat, d.lng) : 9999
-  })).sort((a, b) => a.distance - b.distance);
+    dist: (d.lat && d.lng && searchLat && searchLng)
+          ? getRoadDistKm(searchLat, searchLng, d.lat, d.lng)
+          : 9999
+  }));
+  drivers.sort((a, b) => {
+    if (a.status === 'Online-Available' && b.status !== 'Online-Available') return -1;
+    if (b.status === 'Online-Available' && a.status !== 'Online-Available') return  1;
+    return a.dist - b.dist;
+  });
 
-  // Gather fare estimate for each
-  const dropoffVal  = document.getElementById('p-dropoff-landmark').value;
-  let dropoff       = null;
-  if (dropoffVal) dropoff = JSON.parse(dropoffVal);
+  if (!drivers.length) {
+    list.innerHTML = '<p class="text-center text-slate-400 py-10 text-sm">No drivers found. Try again or change filter.</p>';
+    return;
+  }
+
+  const tierBadge = { Standard:'tier-standard', Express:'tier-express', Premiomity:'tier-premiomity' };
+  const tierLabel = { Standard:'Standard', Express:'Express ⚡', Premiomity:'Premiomity 👑' };
 
   drivers.forEach(d => {
-    const distLabel = d.distance < 9999 ? `~${d.distance.toFixed(1)} km away` : 'Distance unknown';
-    const photo     = d.photoURL || 'https://placehold.co/80x80/10b981/ffffff?text=🛵';
-
-    // Fare estimate if dropoff selected
-    let fareSnippet = '';
-    if (dropoff) {
-      const baseFare  = parseFloat(appSettings.Fare_Base)  || 2.00;
-      const perKm     = parseFloat(appSettings.Fare_PerKm) || 1.50;
-      let   mult      = d.vehicleType === '4 Tyres' ? 1.5 : d.vehicleType === '3 Tyres' ? 1.2 : 1.0;
-      const dist2     = getDistanceFromLatLonInKm(searchLat, searchLng, dropoff.lat, dropoff.lng);
-      const fare      = (baseFare + dist2 * perKm) * mult;
-      fareSnippet     = `<span class="text-xs font-bold text-emerald-600">GHS ${fare.toFixed(2)}</span>`;
-    }
+    const isAvailable = d.status === 'Online-Available';
+    const isBusy      = d.status === 'Online-Busy';
+    const distLabel   = d.dist < 9999 ? '~' + d.dist.toFixed(1) + ' km' : 'Location unknown';
+    const nearLm      = getNearestLandmarkName(d.lat, d.lng);
+    const locationStr = nearLm ? 'Near ' + nearLm : distLabel;
+    const photo       = d.photoURL || 'https://placehold.co/80x80/10b981/fff?text=🛵';
+    const badge       = tierBadge[d.serviceTier] || 'tier-standard';
+    const tierTxt     = tierLabel[d.serviceTier]  || 'Standard';
+    const dotColor    = isAvailable ? 'dot-green' : isBusy ? 'dot-amber' : 'dot-gray';
+    const statusTxt   = isAvailable ? 'Available' : isBusy ? 'On a Ride' : 'Offline';
 
     const card = document.createElement('div');
-    card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 tap-anim slide-up';
+    card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 slide-up';
     card.innerHTML = `
-      <img src="${photo}" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-100"
-           onerror="this.src='https://placehold.co/80x80/10b981/ffffff?text=🛵'">
+      <img src="${photo}" class="w-14 h-14 rounded-full object-cover border-2 border-slate-100 shrink-0"
+           onerror="this.src='https://placehold.co/80x80/10b981/fff?text=?'">
       <div class="flex-1 min-w-0">
-        <h4 class="font-bold text-slate-800 truncate">${d.brandName}</h4>
-        <p class="text-xs text-slate-500">${d.vehicleType} • <span class="text-emerald-600 font-medium">${distLabel}</span></p>
-        ${fareSnippet}
+        <div class="flex items-center gap-2 mb-0.5">
+          <h4 class="font-bold text-slate-800 truncate">${d.brandName}</h4>
+          <span class="text-[10px] px-1.5 py-0.5 rounded-full font-bold ${badge}">${tierTxt}</span>
+        </div>
+        <p class="text-xs text-slate-500">${d.vehicleType}</p>
+        <p class="text-xs text-slate-400">${locationStr}</p>
+        <div class="flex items-center gap-1 mt-0.5">
+          <span class="w-2 h-2 rounded-full ${dotColor}"></span>
+          <span class="text-[10px] text-slate-500">${statusTxt}</span>
+        </div>
       </div>
-      <button onclick="requestRide('${d.phone}','${d.brandName}','${d.workPhone}','${d.telegramChatID || ''}')"
-              class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold tap-anim shrink-0">Book</button>
     `;
+    if (isAvailable) {
+      const btn = document.createElement('button');
+      btn.className  = 'bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold tap shrink-0';
+      btn.innerText  = 'Book';
+      btn.dataset.phone    = d.phone;
+      btn.dataset.brand    = d.brandName;
+      btn.dataset.workphone= d.workPhone;
+      btn.dataset.telegram = d.telegramChatID || '';
+      btn.addEventListener('click', function() {
+        requestRide(this.dataset.phone, this.dataset.brand, this.dataset.workphone, this.dataset.telegram);
+      });
+      card.appendChild(btn);
+    } else {
+      const tag = document.createElement('span');
+      tag.className  = 'text-[10px] text-slate-400 font-bold text-right shrink-0 max-w-[60px]';
+      tag.innerText  = statusTxt;
+      card.appendChild(tag);
+    }
     list.appendChild(card);
   });
 }
 
 async function requestRide(driverPhone, brandName, workPhone, telegramChatId) {
-  const pickupVal  = document.getElementById('p-pickup-landmark').value;
-  const dropoffVal = document.getElementById('p-dropoff-landmark').value;
+  const pickupVal  = searchMode === 'landmark' ? document.getElementById('p-landmark').value : '';
+  let   pickupName = 'GPS Location';
+  if (pickupVal) { try { pickupName = JSON.parse(pickupVal).name; } catch(e){} }
 
-  let pickupName  = 'GPS Location';
-  let dropoffName = '';
-  let estFare     = 0;
-
-  if (pickupVal)  { const p = JSON.parse(pickupVal);  pickupName  = p.name; }
-  if (dropoffVal) { const d = JSON.parse(dropoffVal); dropoffName = d.name; }
-
-  const fareEl = document.getElementById('fare-estimate-text').innerText;
-  const fareMatch = fareEl.match(/[\d.]+/);
-  if (fareMatch) estFare = parseFloat(fareMatch[0]);
+  activeDrvrWorkPhone = workPhone;
+  activeDrvrName      = brandName;
 
   showToast('Sending request…');
   const res = await callAPI('requestRide', {
-    passengerPhone:  currentUser.phone,
-    passengerName:   currentUser.name,
-    driverPhone,
+    passengerPhone:   currentUser.phone,
+    passengerName:    currentUser.name,
+    driverPhone:      driverPhone,
     driverTelegramId: telegramChatId || '',
-    pickupLandmark:  pickupName,
-    dropoffLandmark: dropoffName,
-    estimatedFare:   estFare
+    pickupLandmark:   pickupName,
+    dropoffLandmark:  ''
   });
 
-  if (res.status !== 'success') return showToast('Could not send request. Try again.');
+  if (res.status !== 'success') return showToast('Could not send request: ' + (res.message || 'Try again.'));
 
   activeRideId = res.rideId;
 
-  // Show booking modal
+  // Animate progress
+  let prog = 5;
+  const bar = document.getElementById('booking-progress');
+  bar.style.width = '5%';
+  const progTimer = setInterval(() => {
+    prog = Math.min(prog + 1.5, 90);
+    bar.style.width = prog + '%';
+  }, 600);
+
   showBookingStep(1);
   showModal('modal-booking');
-
-  // Animate progress bar
-  let prog = 0;
-  const bar = document.getElementById('booking-progress');
-  const progInterval = setInterval(() => {
-    prog = Math.min(prog + 2, 90);
-    bar.style.width = prog + '%';
-  }, 500);
-
-  // Start passenger polling (8 s)
-  startPassengerPolling(res.rideId, brandName, workPhone, progInterval);
+  startPassengerPolling(res.rideId, brandName, workPhone, progTimer);
 }
 
 function showBookingStep(step) {
   ['booking-step-1','booking-step-2','booking-step-3','booking-step-declined'].forEach(id =>
-    document.getElementById(id).classList.add('hidden')
-  );
+    document.getElementById(id).classList.add('hidden'));
   const target = step === 'declined' ? 'booking-step-declined' : 'booking-step-' + step;
   document.getElementById(target).classList.remove('hidden');
 }
 
-function startPassengerPolling(rideId, brandName, workPhone, progInterval) {
+function startPassengerPolling(rideId, brandName, workPhone, progTimer) {
   stopPassengerPolling();
   passengerPollInterval = setInterval(async () => {
     const res = await callAPI('getRideStatus', { rideId });
     if (res.status !== 'success') return;
-
-    if (res.ride.rideStatus === 'Accepted') {
-      clearInterval(progInterval);
+    const rs = res.ride.rideStatus;
+    if (rs === 'Accepted') {
+      clearInterval(progTimer);
       document.getElementById('booking-progress').style.width = '100%';
       stopPassengerPolling();
-      document.getElementById('accepted-driver-name').innerText = `${brandName} is on the way! 🏍️`;
-      document.getElementById('accepted-driver-phone').href     = `tel:${workPhone}`;
-      document.getElementById('accepted-driver-phone').innerHTML= `<i class="fa-solid fa-phone mr-2"></i> Call ${workPhone}`;
-      document.getElementById('share-ride-btn').onclick = () => shareMyRide(brandName, workPhone);
+      document.getElementById('accepted-driver-name').innerText = brandName + ' is on the way! 🏍️';
+      document.getElementById('accepted-call-btn').href        = 'tel:' + workPhone;
+      document.getElementById('accepted-call-label').innerText = 'Call ' + workPhone;
+      const waNum = formatWAPhone(workPhone);
+      document.getElementById('accepted-wa-btn').href =
+        'https://wa.me/' + waNum + '?text=' + encodeURIComponent('Hi, I booked you on OKAGIA. I am at: ' + (searchMode==='landmark'&&document.getElementById('p-landmark').value ? JSON.parse(document.getElementById('p-landmark').value).name : 'GPS location') + '. Please come!');
       showBookingStep(2);
       showToast('Driver accepted! 🎉');
-
-    } else if (res.ride.rideStatus === 'Declined') {
-      clearInterval(progInterval);
+    } else if (rs === 'Declined') {
+      clearInterval(progTimer);
       stopPassengerPolling();
       showBookingStep('declined');
     }
@@ -911,80 +1017,74 @@ function stopPassengerPolling() {
 
 async function cancelBooking() {
   stopPassengerPolling();
-  if (activeRideId) await callAPI('declineRide', { rideId: activeRideId, driverPhone: '' });
+  if (activeRideId) await callAPI('declineRide', { rideId: activeRideId });
   closeModal('modal-booking');
   activeRideId = null;
 }
 
-function shareMyRide(driverName, workPhone) {
-  const msg = `🏍️ OKAGIA Safety Alert\n\n` +
-              `I just booked a ride:\n` +
-              `Driver: ${driverName}\n` +
-              `Phone: ${workPhone}\n\n` +
-              `Move Smart. Move Safe. — OKAGIA\n` +
-              `Time: ${new Date().toLocaleTimeString()}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+function shareMyRide() {
+  const msg = '🏍️ OKAGIA Safety Alert\n\nI booked a ride:\nDriver: ' + activeDrvrName +
+              '\nPhone: ' + activeDrvrWorkPhone +
+              '\nTime: ' + new Date().toLocaleTimeString() +
+              '\n\nMove Smart. Move Safe. — OKAGIA';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function showRatingStep() { showBookingStep(3); currentRating = 0; }
-
-function setRating(stars) {
-  currentRating = stars;
+let _currentRating = 0;
+function setRating(n) {
+  _currentRating = n;
   document.querySelectorAll('.star-btn').forEach((el, i) => {
-    el.classList.toggle('lit', i < stars);
+    el.style.color = i < n ? '#f59e0b' : '#d1d5db';
   });
 }
-
 async function submitRating() {
-  if (!currentRating) return showToast('Please tap a star to rate.');
-  if (activeRideId) {
-    await callAPI('rateRide', {
-      rideId:    activeRideId,
-      rating:    currentRating,
-      complaint: document.getElementById('ride-complaint').value.trim()
-    });
-  }
+  if (!_currentRating) return showToast('Please tap a star.');
+  if (activeRideId) await callAPI('rateRide', { rideId: activeRideId, rating: _currentRating, complaint: document.getElementById('ride-complaint').value.trim() });
   closeModal('modal-booking');
-  showToast(`Thanks for rating! ⭐${currentRating}`);
+  showToast('Rating submitted! ⭐' + _currentRating);
   activeRideId = null;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DRIVER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── DRIVER ───────────────────────────────────────────
 async function loadDriverDashboard() {
   const res = await callAPI('getDriverProfile', { phone: currentUser.phone });
-  if (res.status !== 'success') return;
-
+  if (res.status !== 'success') return showToast('Could not load profile: ' + res.message);
   driverProfile = res.driver;
-  const d       = res.driver;
-
-  document.getElementById('driver-owed').innerText    = d.totalOwed.toFixed(2);
-  document.getElementById('driver-brand-display').innerText = d.brandName || '—';
+  const d = res.driver;
+  document.getElementById('driver-owed').innerText          = d.totalOwed.toFixed(2);
+  document.getElementById('driver-brand-display').innerText = d.brandName   || '—';
   document.getElementById('driver-type-display').innerText  = d.vehicleType || '—';
-  document.getElementById('my-approval').innerText    = d.isApproved ? '✅ Approved & Active' : '⏳ Pending Admin Approval';
-  document.getElementById('my-approval').className    = `text-xs font-bold mt-1 ${d.isApproved ? 'text-emerald-600' : 'text-amber-600'}`;
-
+  document.getElementById('driver-tier-display').innerText  =
+    ({ Standard:'Standard', Express:'Express ⚡', Premiomity:'Premiomity 👑' }[d.serviceTier] || 'Standard');
+  document.getElementById('my-approval').innerText = d.isApproved ? '✅ Approved & Active' : '⏳ Pending Admin Approval';
+  document.getElementById('my-approval').className = 'text-xs font-bold mt-0.5 ' + (d.isApproved ? 'text-emerald-600' : 'text-amber-600');
   if (d.photoURL) document.getElementById('driver-profile-photo').src = d.photoURL;
-
   updateDriverStatusUI(d.status);
 
   // WhatsApp admin link
   const waNum = appSettings.AdminWaNumber;
   if (waNum) {
-    const msg = `Hello OKAGIA Admin, I am ${d.brandName} (${d.phone}). I need assistance: `;
-    document.getElementById('wa-admin-link').href = `https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`;
+    document.getElementById('wa-admin-link').href =
+      'https://wa.me/' + formatWAPhone(waNum) + '?text=' + encodeURIComponent('Hello OKAGIA Admin, I am ' + d.brandName + ' (' + d.phone + '). I need help: ');
+  } else {
+    document.getElementById('wa-admin-link').style.display = 'none';
   }
 
-  // If driver is Online-Busy, check for active ride
+  // Active ride banner
   if (d.status === 'Online-Busy') {
-    const rideRes = await callAPI('getDriverActiveRide', { phone: currentUser.phone });
-    if (rideRes.status === 'success') {
-      driverActiveRideId = rideRes.ride.rideId;
-      document.getElementById('active-ride-pickup').innerText  = rideRes.ride.pickupLandmark  || '—';
-      document.getElementById('active-ride-dropoff').innerText = rideRes.ride.dropoffLandmark || '—';
+    const rr = await callAPI('getDriverActiveRide', { phone: currentUser.phone });
+    if (rr.status === 'success') {
+      driverActiveRideId = rr.ride.rideId;
+      document.getElementById('active-ride-pickup').innerText  = rr.ride.pickupLandmark  || '—';
+      document.getElementById('active-ride-dropoff').innerText = rr.ride.dropoffLandmark || '—';
       document.getElementById('active-ride-banner').classList.remove('hidden');
     }
+  }
+
+  // Fetch landmarks for admin GPS data
+  if (!allLandmarks.length) {
+    const lr = await callAPI('getLandmarks');
+    if (lr.status === 'success') allLandmarks = lr.landmarks;
   }
 }
 
@@ -992,53 +1092,43 @@ function updateDriverStatusUI(status) {
   const btn = document.getElementById('driver-status-btn');
   const txt = document.getElementById('driver-status-text');
   btn.dataset.current = status;
-
   if (status === 'Online-Available') {
     btn.innerText  = 'GO OFFLINE';
-    btn.className  = 'w-full py-3 rounded-xl font-bold text-sm tap-anim bg-emerald-500 text-white online-pulse';
+    btn.className  = 'w-full py-3 rounded-xl font-bold text-sm tap bg-emerald-500 text-white pulse-green';
     txt.innerText  = '🟢 Online & Available';
   } else if (status === 'Online-Busy') {
     btn.innerText  = 'GO OFFLINE';
-    btn.className  = 'w-full py-3 rounded-xl font-bold text-sm tap-anim bg-amber-500 text-white';
+    btn.className  = 'w-full py-3 rounded-xl font-bold text-sm tap bg-amber-500 text-white';
     txt.innerText  = '🚗 On a Ride';
   } else {
     btn.innerText  = 'GO ONLINE';
-    btn.className  = 'w-full py-3 rounded-xl font-bold text-sm tap-anim bg-slate-200 text-slate-600';
-    txt.innerText  = '💤 Currently Offline';
+    btn.className  = 'w-full py-3 rounded-xl font-bold text-sm tap bg-slate-200 text-slate-600';
+    txt.innerText  = '💤 Offline';
   }
 }
 
 async function toggleDriverStatus() {
-  const btn       = document.getElementById('driver-status-btn');
-  const current   = btn.dataset.current || 'Offline';
-  const goingOnline = current === 'Offline';
-
+  const btn     = document.getElementById('driver-status-btn');
+  const current = btn.dataset.current || 'Offline';
+  const goOnline= current === 'Offline';
   let lat = null, lng = null;
-  if (goingOnline) {
+  if (goOnline) {
     try {
-      showToast('Getting your location…');
+      showToast('Getting your GPS…');
       const pos = await getCurrentLocation();
       lat = pos.lat; lng = pos.lng;
-    } catch (e) {
-      showToast('GPS unavailable. Going online without location.');
-    }
+    } catch(e) { showToast('GPS not available. Going online without location.'); }
   }
-
-  const newStatus = goingOnline ? 'Online-Available' : 'Offline';
-  updateDriverStatusUI(newStatus); // optimistic
-
+  const newStatus = goOnline ? 'Online-Available' : 'Offline';
+  updateDriverStatusUI(newStatus);
   const res = await callAPI('updateDriverStatus', { phone: currentUser.phone, status: newStatus, lat, lng });
   if (res.status === 'success') {
-    showToast(goingOnline ? 'You are now ONLINE 🟢' : 'You are now OFFLINE');
-    if (!goingOnline) {
-      stopDriverPolling();
-      document.getElementById('active-ride-banner').classList.add('hidden');
-    } else {
-      startDriverPolling();
-    }
+    showToast(goOnline ? 'You are now ONLINE 🟢' : 'You are now OFFLINE');
+    goOnline ? startDriverPolling() : stopDriverPolling();
+    if (!goOnline) document.getElementById('active-ride-banner').classList.add('hidden');
   } else {
-    updateDriverStatusUI(current); // revert
-    showToast('Status update failed. Check connection.');
+    updateDriverStatusUI(current);
+    showToast('Status update failed.');
   }
 }
 
@@ -1046,7 +1136,6 @@ function startDriverPolling() {
   stopDriverPolling();
   ridePollingInterval = setInterval(checkForPendingRide, 8000);
 }
-
 function stopDriverPolling() {
   if (ridePollingInterval) { clearInterval(ridePollingInterval); ridePollingInterval = null; }
 }
@@ -1054,21 +1143,15 @@ function stopDriverPolling() {
 async function checkForPendingRide() {
   if (!currentUser || currentUser.role !== 'Driver') return;
   const btn = document.getElementById('driver-status-btn');
-  if (btn.dataset.current !== 'Online-Available') return; // don't poll if busy/offline
-
+  if (btn.dataset.current !== 'Online-Available') return;
   const res = await callAPI('getPendingRide', { phone: currentUser.phone });
   if (res.status === 'success' && res.ride) {
-    stopDriverPolling(); // pause while alert is shown
-    showNewRideNotification(res.ride);
+    stopDriverPolling();
+    document.getElementById('pending-ride-id').value           = res.ride.rideId;
+    document.getElementById('pending-ride-pickup').innerText   = res.ride.pickupLandmark  || 'Nearby';
+    document.getElementById('pending-ride-dropoff').innerText  = res.ride.dropoffLandmark || 'TBD';
+    showModal('modal-new-ride');
   }
-}
-
-function showNewRideNotification(ride) {
-  document.getElementById('pending-ride-id').value            = ride.rideId;
-  document.getElementById('pending-ride-pickup').innerText    = ride.pickupLandmark  || 'Nearby';
-  document.getElementById('pending-ride-dropoff').innerText   = ride.dropoffLandmark || 'TBD';
-  document.getElementById('pending-ride-fare').innerText      = `GHS ${parseFloat(ride.estimatedFare || 0).toFixed(2)}`;
-  showModal('modal-new-ride');
 }
 
 async function acceptRideRequest() {
@@ -1076,14 +1159,11 @@ async function acceptRideRequest() {
   const res    = await callAPI('acceptRide', { rideId, driverPhone: currentUser.phone });
   if (res.status === 'success') {
     closeModal('modal-new-ride');
-    showToast(`Ride accepted! GHS ${parseFloat(res.charge).toFixed(2)} charged. 🚗`);
+    showToast('Ride accepted! GHS ' + parseFloat(res.charge).toFixed(2) + ' charged. 🚗');
     driverActiveRideId = rideId;
     updateDriverStatusUI('Online-Busy');
-    // Update owed amount
-    const profile = await callAPI('getDriverProfile', { phone: currentUser.phone });
-    if (profile.status === 'success')
-      document.getElementById('driver-owed').innerText = profile.driver.totalOwed.toFixed(2);
-    // Show active ride banner
+    const pr = await callAPI('getDriverProfile', { phone: currentUser.phone });
+    if (pr.status === 'success') document.getElementById('driver-owed').innerText = pr.driver.totalOwed.toFixed(2);
     document.getElementById('active-ride-pickup').innerText  = document.getElementById('pending-ride-pickup').innerText;
     document.getElementById('active-ride-dropoff').innerText = document.getElementById('pending-ride-dropoff').innerText;
     document.getElementById('active-ride-banner').classList.remove('hidden');
@@ -1095,7 +1175,7 @@ async function acceptRideRequest() {
 
 async function declineRideRequest() {
   const rideId = document.getElementById('pending-ride-id').value;
-  await callAPI('declineRide', { rideId, driverPhone: currentUser.phone });
+  await callAPI('declineRide', { rideId });
   closeModal('modal-new-ride');
   showToast('Ride declined.');
   startDriverPolling();
@@ -1105,7 +1185,7 @@ async function completeMyRide() {
   if (!driverActiveRideId) return;
   const res = await callAPI('completeRide', { rideId: driverActiveRideId, driverPhone: currentUser.phone });
   if (res.status === 'success') {
-    showToast('Ride completed! ✅');
+    showToast('Ride completed ✅');
     driverActiveRideId = null;
     updateDriverStatusUI('Online-Available');
     document.getElementById('active-ride-banner').classList.add('hidden');
@@ -1116,86 +1196,72 @@ async function completeMyRide() {
 async function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024) return showToast('Image too large. Max 3MB.');
-
-  showToast('Uploading photo…');
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64   = e.target.result.split(',')[1];
-    const mimeType = file.type;
+  if (file.size > 5 * 1024 * 1024) return showToast('Image too large. Max 5MB.');
+  showToast('Compressing and uploading…');
+  try {
+    const base64   = await compressImage(file, 480, 0.75);
+    const mimeType = 'image/jpeg';
     const res      = await callAPI('updateDriverPhoto', { phone: currentUser.phone, base64, mimeType });
     if (res.status === 'success') {
       document.getElementById('driver-profile-photo').src = res.photoURL;
-      showToast('Profile photo updated! ✅');
+      showToast('Photo updated! ✅');
     } else {
-      showToast('Upload failed: ' + (res.message || 'Try again.'));
+      showToast('Upload failed: ' + (res.message || 'Check Drive folder ID in Code.gs'));
     }
-  };
-  reader.readAsDataURL(file);
+  } catch(e) {
+    showToast('Upload error: ' + e.message);
+  }
+}
+
+function compressImage(file, maxPx, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale  = Math.min(maxPx / Math.max(img.width, img.height), 1);
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
 }
 
 function linkTelegram() {
-  const phone = currentUser.phone;
-  const url   = `https://t.me/${TELEGRAM_BOT_NAME}?start=${phone}`;
-  window.open(url, '_blank');
+  window.open('https://t.me/' + TELEGRAM_BOT_NAME + '?start=' + currentUser.phone, '_blank');
   showToast('Open Telegram and tap START to link your account.');
 }
 
 function copyDriverLink() {
-  const url = `${window.location.origin}${window.location.pathname}?driver=${currentUser.phone}`;
-  navigator.clipboard.writeText(url).then(() => showToast('Profile link copied! Share it with passengers. 🔗'));
+  const url = window.location.origin + window.location.pathname + '?driver=' + currentUser.phone;
+  navigator.clipboard.writeText(url).then(() => showToast('Profile link copied! 🔗'));
 }
 
 function generateStatusCard() {
   const canvas = document.createElement('canvas');
-  canvas.width  = 800;
-  canvas.height = 450;
-  const ctx   = canvas.getContext('2d');
-  const grad  = ctx.createLinearGradient(0, 0, 800, 450);
-  grad.addColorStop(0, '#0f172a');
-  grad.addColorStop(1, '#064e3b');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 800, 450);
-
-  // Decorative circle
-  ctx.beginPath();
-  ctx.arc(680, 80, 120, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(16,185,129,0.12)';
-  ctx.fill();
-
-  // Motorcycle emoji
-  ctx.font      = '80px serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('🏍️', 60, 130);
-
-  // OKAGIA
-  ctx.fillStyle = '#10b981';
-  ctx.font      = 'bold 72px sans-serif';
-  ctx.fillText('OKAGIA', 60, 220);
-
-  // Driver name
-  ctx.fillStyle = '#ffffff';
-  ctx.font      = 'bold 38px sans-serif';
-  ctx.fillText(driverProfile?.brandName || currentUser.name, 60, 290);
-
-  // Vehicle type
-  ctx.fillStyle = '#94a3b8';
-  ctx.font      = '26px sans-serif';
-  ctx.fillText((driverProfile?.vehicleType || '') + ' • Available Now', 60, 335);
-
-  // Tagline
-  ctx.fillStyle = '#64748b';
-  ctx.font      = '22px sans-serif';
-  ctx.fillText('Move Smart. Move Safe. 🇬🇭', 60, 400);
-
-  const link    = document.createElement('a');
-  link.download = 'okagia-status-card.png';
-  link.href     = canvas.toDataURL('image/png');
-  link.click();
-  showToast('Status card saved! Post it on WhatsApp. 🟢');
+  canvas.width = 800; canvas.height = 450;
+  const ctx = canvas.getContext('2d');
+  const g   = ctx.createLinearGradient(0,0,800,450);
+  g.addColorStop(0,'#0f172a'); g.addColorStop(1,'#064e3b');
+  ctx.fillStyle = g; ctx.fillRect(0,0,800,450);
+  ctx.beginPath(); ctx.arc(680,80,130,0,Math.PI*2);
+  ctx.fillStyle = 'rgba(16,185,129,0.1)'; ctx.fill();
+  ctx.font='80px serif'; ctx.textAlign='left'; ctx.fillText('🏍️',60,130);
+  ctx.fillStyle='#10b981'; ctx.font='bold 70px sans-serif'; ctx.fillText('OKAGIA',60,220);
+  ctx.fillStyle='#ffffff'; ctx.font='bold 36px sans-serif';
+  ctx.fillText(driverProfile?.brandName || currentUser.name, 60, 285);
+  ctx.fillStyle='#94a3b8'; ctx.font='24px sans-serif';
+  ctx.fillText((driverProfile?.vehicleType||'') + ' • ' + (driverProfile?.serviceTier||'Standard'), 60, 330);
+  ctx.fillStyle='#64748b'; ctx.font='20px sans-serif';
+  ctx.fillText('Move Smart. Move Safe. 🇬🇭', 60, 395);
+  const a = document.createElement('a');
+  a.download='okagia-status.png'; a.href=canvas.toDataURL('image/png'); a.click();
+  showToast('Status card saved! Post it on WhatsApp 🟢');
 }
-
-function showPaymentModal() { showModal('modal-payment'); }
 
 async function submitPayment() {
   const amount = document.getElementById('pay-amount').value.trim();
@@ -1205,116 +1271,173 @@ async function submitPayment() {
   if (res.status === 'success') {
     showToast('Payment submitted! Admin will verify. ✅');
     closeModal('modal-payment');
-    document.getElementById('pay-amount').value = '';
-    document.getElementById('pay-ref').value    = '';
-  } else {
-    showToast('Submission failed. Try again.');
-  }
+    document.getElementById('pay-amount').value = document.getElementById('pay-ref').value = '';
+  } else { showToast('Submission failed.'); }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ADMIN
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── ADMIN ────────────────────────────────────────────
 function showAdminTab(tab) {
-  ['drivers','payments','landmarks','broadcast'].forEach(t => {
-    document.getElementById(`admin-tab-${t}`).classList.add('hidden-view');
-  });
-  document.getElementById(`admin-tab-${tab}`).classList.remove('hidden-view');
-
-  if      (tab === 'drivers')  loadAdminDrivers();
-  else if (tab === 'payments') loadAdminPayments();
+  ['drivers','payments','landmarks','broadcast'].forEach(t =>
+    document.getElementById('admin-tab-'+t).classList.add('hidden-view'));
+  document.getElementById('admin-tab-'+tab).classList.remove('hidden-view');
+  if (tab==='drivers')  loadAdminDrivers();
+  if (tab==='payments') loadAdminPayments();
 }
 
 async function loadAdminDrivers() {
   const res  = await callAPI('getAllDrivers');
   const list = document.getElementById('admin-driver-list');
   list.innerHTML = '';
-
-  if (res.status !== 'success' || !res.drivers.length) {
-    list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No drivers registered yet.</p>';
-    return;
+  if (res.status!=='success'||!res.drivers.length) {
+    list.innerHTML='<p class="text-center text-slate-400 py-6 text-sm">No drivers yet.</p>'; return;
   }
-
+  const tierOptions = ['Standard','Express','Premiomity'].map(t=>`<option value="${t}">${t}</option>`).join('');
   res.drivers.forEach(d => {
     const div = document.createElement('div');
-    div.className = 'p-4 flex justify-between items-center gap-2';
+    div.className = 'p-4 border-b';
     div.innerHTML = `
-      <div class="flex-1 min-w-0">
-        <p class="font-bold text-sm truncate">${d.brandName || 'Unnamed'}</p>
-        <p class="text-xs text-slate-500">${d.vehicleType} • ${d.phone}</p>
-        <p class="text-xs font-bold ${d.isApproved ? 'text-emerald-600':'text-red-500'}">
-          ${d.isApproved ? '✅ Approved':'⏳ Pending'} | Owes: GHS ${parseFloat(d.totalOwed||0).toFixed(2)}
-        </p>
+      <div class="flex justify-between items-start mb-2">
+        <div>
+          <p class="font-bold text-sm">${d.brandName||'Unnamed'}</p>
+          <p class="text-xs text-slate-500">${d.vehicleType} • ${d.phone}</p>
+          <p class="text-xs font-bold ${d.isApproved?'text-emerald-600':'text-red-500'}">
+            ${d.isApproved?'✅ Approved':'⏳ Pending'} | Owes: GHS ${parseFloat(d.totalOwed||0).toFixed(2)}
+          </p>
+        </div>
+        <div class="flex gap-1">
+          <button data-ph="${d.phone}" data-app="true"  class="approve-btn bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg text-xs font-bold">Approve</button>
+          <button data-ph="${d.phone}" data-app="false" class="approve-btn bg-red-100    text-red-700    px-2 py-1 rounded-lg text-xs font-bold">Reject</button>
+        </div>
       </div>
-      <div class="flex gap-1 shrink-0">
-        <button onclick="approveDriver('${d.phone}',true)"  class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold tap-anim">Approve</button>
-        <button onclick="approveDriver('${d.phone}',false)" class="bg-red-100    text-red-700    px-3 py-1 rounded-lg text-xs font-bold tap-anim">Reject</button>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="text-xs text-slate-400">Tier:</span>
+        <select class="tier-select text-xs border rounded-lg p-1 bg-white" data-ph="${d.phone}">
+          ${['Standard','Express','Premiomity'].map(t=>`<option ${t===d.serviceTier?'selected':''}>${t}</option>`).join('')}
+        </select>
       </div>
     `;
+    div.querySelectorAll('.approve-btn').forEach(btn =>
+      btn.addEventListener('click', () => approveDriver(btn.dataset.ph, btn.dataset.app === 'true'))
+    );
+    div.querySelector('.tier-select').addEventListener('change', function() {
+      updateDriverTierAdmin(this.dataset.ph, this.value);
+    });
     list.appendChild(div);
   });
 }
 
 async function approveDriver(phone, isApproved) {
   const res = await callAPI('updateDriverApproval', { phone, isApproved });
-  if (res.status === 'success') { showToast(`Driver ${isApproved ? 'approved ✅':'rejected'}.`); loadAdminDrivers(); }
+  if (res.status==='success') { showToast('Driver '+(isApproved?'approved ✅':'rejected')); loadAdminDrivers(); }
+}
+
+async function updateDriverTierAdmin(phone, tier) {
+  const res = await callAPI('updateDriverTier', { phone, tier });
+  if (res.status==='success') showToast('Tier updated to ' + tier);
 }
 
 async function loadAdminPayments() {
   const res  = await callAPI('getPayments');
   const list = document.getElementById('admin-payment-list');
   list.innerHTML = '';
-
-  if (res.status !== 'success' || !res.payments.length) {
-    list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No payment records yet.</p>';
-    return;
+  if (res.status!=='success'||!res.payments.length) {
+    list.innerHTML='<p class="text-center text-slate-400 py-6 text-sm">No payments yet.</p>'; return;
   }
-
   res.payments.slice().reverse().forEach(p => {
     const div = document.createElement('div');
-    div.className = 'p-4 flex justify-between items-center gap-2';
+    div.className = 'p-4 flex justify-between items-center gap-2 border-b';
     div.innerHTML = `
       <div class="flex-1 min-w-0">
         <p class="font-bold text-sm">${p.phone}</p>
-        <p class="text-xs text-slate-500">GHS ${p.amount} • Ref: ${p.reference}</p>
+        <p class="text-xs text-slate-500">GHS ${p.amount} • ${p.reference}</p>
         <p class="text-xs font-bold ${p.status==='Paid'?'text-emerald-600':'text-amber-600'}">${p.status}</p>
       </div>
-      ${p.status === 'Pending'
-        ? `<button onclick="markPaid('${p.id}')" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold tap-anim shrink-0">Mark Paid</button>`
-        : '<span class="text-emerald-500 text-xs shrink-0">✓ Done</span>'
-      }
+      ${p.status==='Pending'
+        ?`<button data-id="${p.id}" class="mark-paid-btn bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold shrink-0">Mark Paid</button>`
+        :'<span class="text-emerald-500 text-xs shrink-0">✓ Done</span>'}
     `;
+    const btn = div.querySelector('.mark-paid-btn');
+    if (btn) btn.addEventListener('click', () => markPaid(btn.dataset.id));
     list.appendChild(div);
   });
 }
 
 async function markPaid(paymentId) {
-  const res = await callAPI('markPaymentPaid', { paymentId, note: 'Verified by Admin' });
-  if (res.status === 'success') { showToast('Marked as paid ✅'); loadAdminPayments(); loadAdminDrivers(); }
+  const res = await callAPI('markPaymentPaid', { paymentId, note:'Admin verified' });
+  if (res.status==='success') { showToast('Marked as paid ✅'); loadAdminPayments(); loadAdminDrivers(); }
+}
+
+// ── LANDMARK PATH RECORDING ──────────────────────────
+function startPathRecording() {
+  pathWaypoints = [];
+  document.getElementById('path-idle').classList.add('hidden');
+  document.getElementById('path-recording').classList.remove('hidden');
+  let distSoFar = 0;
+  pathRecordingTimer = setInterval(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => {
+      const pt = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      if (pathWaypoints.length > 0) {
+        const prev = pathWaypoints[pathWaypoints.length - 1];
+        distSoFar += getRoadDistKm(prev.lat, prev.lng, pt.lat, pt.lng);
+      }
+      pathWaypoints.push(pt);
+      document.getElementById('waypoint-count').innerText   = pathWaypoints.length + ' pts';
+      document.getElementById('path-distance-live').innerText = 'Distance so far: ' + distSoFar.toFixed(2) + ' km';
+    }, null, { enableHighAccuracy: true });
+  }, 5000);
+  showToast('Path recording started. Walk or drive to the landmark.');
+}
+
+function stopPathRecording() {
+  clearInterval(pathRecordingTimer);
+  document.getElementById('path-recording').classList.add('hidden');
+  document.getElementById('path-idle').classList.remove('hidden');
+  navigator.geolocation.getCurrentPosition(pos => {
+    const finalPt = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (pathWaypoints.length > 0) {
+      const prev = pathWaypoints[pathWaypoints.length-1];
+      pathWaypoints.push(finalPt);
+    } else {
+      pathWaypoints.push(finalPt);
+    }
+    document.getElementById('lm-lat').value = finalPt.lat.toFixed(6);
+    document.getElementById('lm-lng').value = finalPt.lng.toFixed(6);
+    let dist = 0;
+    for (let i = 1; i < pathWaypoints.length; i++)
+      dist += getRoadDistKm(pathWaypoints[i-1].lat, pathWaypoints[i-1].lng, pathWaypoints[i].lat, pathWaypoints[i].lng);
+    showToast('Arrived! ' + pathWaypoints.length + ' points, ' + dist.toFixed(2) + ' km recorded. Now enter the landmark name and save.');
+  }, null, { enableHighAccuracy: true });
 }
 
 function getAdminLocation() {
-  navigator.geolocation.getCurrentPosition(
-    p => {
-      document.getElementById('lm-lat').value = p.coords.latitude.toFixed(6);
-      document.getElementById('lm-lng').value = p.coords.longitude.toFixed(6);
-      showToast('GPS coordinates filled! ✅');
-    },
-    () => showToast('Could not get location. Enable GPS.')
-  );
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('lm-lat').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('lm-lng').value = pos.coords.longitude.toFixed(6);
+    pathWaypoints = [];
+    showToast('GPS coordinates filled! ✅');
+  }, () => showToast('GPS failed. Enable location access.'));
 }
 
-async function addLandmark() {
+async function saveLandmark() {
   const name = document.getElementById('lm-name').value.trim();
   const lat  = document.getElementById('lm-lat').value;
   const lng  = document.getElementById('lm-lng').value;
-  if (!name || !lat || !lng) return showToast('Fill in all three fields.');
-  const res = await callAPI('addLandmark', { name, lat, lng });
+  if (!name || !lat || !lng) return showToast('Please fill in all fields (name, lat, lng).');
+  let dist = 0;
+  for (let i = 1; i < pathWaypoints.length; i++)
+    dist += getRoadDistKm(pathWaypoints[i-1].lat, pathWaypoints[i-1].lng, pathWaypoints[i].lat, pathWaypoints[i].lng);
+  const res = await callAPI('addLandmark', {
+    name, lat, lng,
+    pathData: pathWaypoints.length > 1 ? pathWaypoints : [],
+    pathDistance: dist > 0 ? dist : null
+  });
   if (res.status === 'success') {
-    showToast(`"${name}" added! ✅`);
+    showToast('"' + name + '" saved! ✅');
     document.getElementById('lm-name').value = '';
     document.getElementById('lm-lat').value  = '';
     document.getElementById('lm-lng').value  = '';
+    pathWaypoints = [];
   }
 }
 
@@ -1322,116 +1445,61 @@ async function sendBroadcast() {
   const msg = document.getElementById('broadcast-msg').value.trim();
   if (!msg) return showToast('Type a message first.');
   const res = await callAPI('saveBroadcast', { message: msg });
-  if (res.status === 'success') {
-    showToast('Broadcast saved! ✅');
-    document.getElementById('broadcast-msg').value = '';
-  }
+  if (res.status==='success') { showToast('Broadcast saved ✅'); document.getElementById('broadcast-msg').value=''; }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// MINI GAME — Okada Dodge
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let gameInterval = null;
-let score = 0, playerX = 135, obstacles = [], gameRunning = false;
+// ── MINI GAME ────────────────────────────────────────
+let gameInterval = null, _score = 0, _playerX = 135, _obstacles = [], _gameOn = false;
 
-function startGame() {
-  showModal('modal-game');
-  initGame();
-}
-
-function closeGame() {
-  if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
-  gameRunning = false;
-  closeModal('modal-game');
-}
+function startGame() { showModal('modal-game'); initGame(); }
+function closeGame()  { clearInterval(gameInterval); gameInterval=null; _gameOn=false; closeModal('modal-game'); }
 
 function initGame() {
-  if (gameInterval) clearInterval(gameInterval);
+  clearInterval(gameInterval);
   const canvas = document.getElementById('game-canvas');
   const ctx    = canvas.getContext('2d');
-  score = 0; playerX = 135; obstacles = []; gameRunning = true;
-  document.getElementById('game-score').innerText = 0;
-
+  _score=0; _playerX=135; _obstacles=[]; _gameOn=true;
+  document.getElementById('game-score').innerText=0;
   canvas.onclick = e => {
-    if (!gameRunning) { initGame(); return; }
-    const rect = canvas.getBoundingClientRect();
-    const half = (rect.right - rect.left) / 2;
-    playerX = (e.clientX - rect.left < half)
-      ? Math.max(10,  playerX - 45)
-      : Math.min(260, playerX + 45);
+    if (!_gameOn) { initGame(); return; }
+    const r = canvas.getBoundingClientRect();
+    _playerX = (e.clientX-r.left < 150) ? Math.max(10,_playerX-45) : Math.min(260,_playerX+45);
   };
-
   gameInterval = setInterval(() => {
-    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 300, 450);
-
-    // Road lines
-    ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2;
-    ctx.setLineDash([20,15]);
-    ctx.beginPath(); ctx.moveTo(150,0); ctx.lineTo(150,450); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Player (green okada)
-    ctx.fillStyle = '#10b981';
-    ctx.beginPath(); ctx.roundRect(playerX, 380, 30, 45, 4); ctx.fill();
-    ctx.fillStyle = '#065f46';
-    ctx.fillRect(playerX + 5, 370, 20, 15);
-
-    // Spawn obstacles
-    if (Math.random() < 0.04) {
-      obstacles.push({ x: Math.floor(Math.random() * 260), y: -50, color: ['#ef4444','#f97316','#dc2626'][Math.floor(Math.random()*3)] });
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,300,450);
+    ctx.strokeStyle='#1e293b'; ctx.lineWidth=2; ctx.setLineDash([20,15]);
+    ctx.beginPath(); ctx.moveTo(150,0); ctx.lineTo(150,450); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#10b981';
+    ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(_playerX,385,30,45,4); else ctx.rect(_playerX,385,30,45); ctx.fill();
+    ctx.fillStyle='#065f46'; ctx.fillRect(_playerX+5,375,20,14);
+    if (Math.random()<0.04) _obstacles.push({ x:Math.floor(Math.random()*260), y:-50, c:['#ef4444','#f97316','#dc2626'][Math.floor(Math.random()*3)] });
+    let over=false;
+    for (let i=_obstacles.length-1;i>=0;i--) {
+      const o=_obstacles[i]; o.y+=4;
+      ctx.fillStyle=o.c;
+      ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(o.x,o.y,30,45,4); else ctx.rect(o.x,o.y,30,45); ctx.fill();
+      if (o.y+45>385&&o.y<430&&Math.abs(o.x-_playerX)<28) { over=true; break; }
+      if (o.y>450) { _obstacles.splice(i,1); _score++; document.getElementById('game-score').innerText=_score; }
     }
-
-    // Draw & move obstacles
-    let gameOver = false;
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-      const o = obstacles[i];
-      o.y += 4;
-      ctx.fillStyle = o.color;
-      ctx.beginPath(); ctx.roundRect(o.x, o.y, 30, 45, 4); ctx.fill();
-
-      // Collision
-      if (o.y + 45 > 380 && o.y < 425 && Math.abs(o.x - playerX) < 28) {
-        gameOver = true; break;
-      }
-      if (o.y > 450) { obstacles.splice(i, 1); score++; document.getElementById('game-score').innerText = score; }
+    if (over) {
+      clearInterval(gameInterval); _gameOn=false;
+      ctx.fillStyle='rgba(0,0,0,.75)'; ctx.fillRect(0,0,300,450);
+      ctx.fillStyle='#ef4444'; ctx.font='bold 28px sans-serif'; ctx.textAlign='center'; ctx.fillText('GAME OVER',150,200);
+      ctx.fillStyle='#fff'; ctx.font='18px sans-serif'; ctx.fillText('Score: '+_score,150,240);
+      ctx.fillStyle='#10b981'; ctx.font='13px sans-serif'; ctx.fillText('Tap to restart',150,278); ctx.textAlign='left';
+      showToast('Game over! Score: '+_score);
     }
-
-    if (gameOver) {
-      clearInterval(gameInterval); gameRunning = false;
-      ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(0,0,300,450);
-      ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', 150, 200);
-      ctx.fillStyle = '#fff';
-      ctx.font = '18px sans-serif';
-      ctx.fillText(`Score: ${score}`, 150, 240);
-      ctx.fillStyle = '#10b981';
-      ctx.font = '14px sans-serif';
-      ctx.fillText('Tap to restart', 150, 280);
-      ctx.textAlign = 'left';
-      showToast(`Game over! Score: ${score}`);
-    }
-  }, 20);
+  },20);
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// INIT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── INIT ─────────────────────────────────────────────
 window.onload = () => {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
   setupAdminTap();
   loadLeaderboard();
-
-  // Restore session
   const saved = localStorage.getItem('okagia_user');
   if (saved) {
-    try {
-      currentUser = JSON.parse(saved);
-      loadDashboard();
-    } catch (e) {
-      localStorage.removeItem('okagia_user');
-    }
+    try { currentUser = JSON.parse(saved); loadDashboard(); } catch(e) { localStorage.removeItem('okagia_user'); }
   }
 };
 </script>
