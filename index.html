@@ -320,11 +320,17 @@
       <i class="fa-brands fa-telegram text-lg"></i> Link Telegram for Ride Alerts
     </button>
 
-    <!-- Contact Admin via WhatsApp -->
-    <a id="wa-admin-link" href="#" target="_blank"
-       class="block bg-green-500 text-white p-3 rounded-xl text-center font-bold tap">
-      <i class="fa-brands fa-whatsapp mr-2 text-xl"></i> Contact Admin via WhatsApp
-    </a>
+    <!-- Contact Admin via WhatsApp or SMS -->
+    <div class="grid grid-cols-2 gap-3">
+      <a id="wa-admin-link" href="#" target="_blank"
+         class="block bg-green-500 text-white p-3 rounded-xl text-center font-bold tap text-sm">
+        <i class="fa-brands fa-whatsapp mr-1 text-base"></i> WhatsApp Admin
+      </a>
+      <a id="sms-admin-link" href="#"
+         class="block bg-blue-500 text-white p-3 rounded-xl text-center font-bold tap text-sm">
+        <i class="fa-solid fa-message mr-1 text-base"></i> SMS Admin
+      </a>
+    </div>
   </div>
 
   <!-- ── ADMIN DASHBOARD ─────────────────── -->
@@ -481,10 +487,16 @@
          class="block w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-2 tap">
         <i class="fa-solid fa-phone mr-2"></i> <span id="accepted-call-label">Call Driver</span>
       </a>
-      <a id="accepted-wa-btn" href="#" target="_blank"
-         class="block w-full bg-green-500 text-white py-2 rounded-xl font-bold text-sm mb-2 tap">
-        <i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp Driver
-      </a>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <a id="accepted-wa-btn" href="#" target="_blank"
+           class="block bg-green-500 text-white py-2 rounded-xl font-bold text-sm tap text-center">
+          <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
+        </a>
+        <a id="accepted-sms-btn" href="#"
+           class="block bg-blue-500 text-white py-2 rounded-xl font-bold text-sm tap text-center">
+          <i class="fa-solid fa-message mr-1"></i> SMS
+        </a>
+      </div>
       <button onclick="shareMyRide()" class="w-full bg-blue-50 text-blue-700 py-2 rounded-xl font-bold text-sm mb-2 tap">
         <i class="fa-solid fa-shield-halved mr-1"></i> Share My Ride (Safety)
       </button>
@@ -552,7 +564,7 @@
 <!-- ═══════════ JAVASCRIPT ═══════════ -->
 <script>
 // ── CONFIG — set these ──────────────────────────────
-const API_URL           = 'https://script.google.com/macros/s/AKfycbz-7brO-iD3MiWn6lnnBuWqI8sp9ffIBHHevZrGwHyxaRYs3zhFFtj39Byvz6JclLMP5A/exec';
+const API_URL           = 'https://script.google.com/macros/s/AKfycbwCKWDJ_jyn4CwbhQo34acrXk-sqBh24md_qo-ddNeRuCwF2M4nkufY6ZQnINqWGw-XWw/exec';
 const TELEGRAM_BOT_NAME = '@Okagiabot';   // bot @username without @
 
 // ── STATE ───────────────────────────────────────────
@@ -579,18 +591,34 @@ let pwaInstallPrompt     = null;
 
 // ── CORE API ────────────────────────────────────────
 // Uses POST with form-encoded body — handles large payloads (photos etc.)
+// Regular calls — action & data go in URL query string.
+// Apps Script e.parameter ONLY reads query strings, not POST body.
 async function callAPI(action, data = {}) {
   try {
-    const res = await fetch(API_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    'action=' + encodeURIComponent(action) +
-               '&data='  + encodeURIComponent(JSON.stringify(data))
-    });
+    const url = API_URL
+      + '?action=' + encodeURIComponent(action)
+      + '&data='   + encodeURIComponent(JSON.stringify(data));
+    const res = await fetch(url, { method: 'POST' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return await res.json();
   } catch (err) {
     return { status: 'error', message: 'Connection failed. Check network.' };
+  }
+}
+
+// Large uploads (photos) — action in URL, body is raw JSON read via e.postData.contents
+async function callAPILarge(action, data = {}) {
+  try {
+    const url = API_URL + '?action=' + encodeURIComponent(action);
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body:    JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', message: 'Upload failed: ' + err.message };
   }
 }
 
@@ -999,8 +1027,14 @@ function startPassengerPolling(rideId, brandName, workPhone, progTimer) {
       document.getElementById('accepted-call-btn').href        = 'tel:' + workPhone;
       document.getElementById('accepted-call-label').innerText = 'Call ' + workPhone;
       const waNum = formatWAPhone(workPhone);
+      const _pickupLabel = (searchMode === 'landmark' && document.getElementById('p-landmark').value)
+        ? JSON.parse(document.getElementById('p-landmark').value).name : 'my GPS location';
+      const _rideMsg = 'Hi, I booked you on OKAGIA. I am at: ' + _pickupLabel + '. Please come!';
       document.getElementById('accepted-wa-btn').href =
-        'https://wa.me/' + waNum + '?text=' + encodeURIComponent('Hi, I booked you on OKAGIA. I am at: ' + (searchMode==='landmark'&&document.getElementById('p-landmark').value ? JSON.parse(document.getElementById('p-landmark').value).name : 'GPS location') + '. Please come!');
+        'https://wa.me/' + waNum + '?text=' + encodeURIComponent(_rideMsg);
+      // SMS link — opens default SMS app with message pre-filled
+      document.getElementById('accepted-sms-btn').href =
+        'sms:+' + waNum + '?body=' + encodeURIComponent(_rideMsg);
       showBookingStep(2);
       showToast('Driver accepted! 🎉');
     } else if (rs === 'Declined') {
@@ -1064,10 +1098,20 @@ async function loadDriverDashboard() {
   // WhatsApp admin link
   const waNum = appSettings.AdminWaNumber;
   if (waNum) {
-    document.getElementById('wa-admin-link').href =
-      'https://wa.me/' + formatWAPhone(waNum) + '?text=' + encodeURIComponent('Hello OKAGIA Admin, I am ' + d.brandName + ' (' + d.phone + '). I need help: ');
+    const _adminFormatted = formatWAPhone(waNum);
+    const _adminMsg       = encodeURIComponent('Hello OKAGIA Admin, I am ' + d.brandName + ' (' + d.phone + '). I need help: ');
+    const waLink  = document.getElementById('wa-admin-link');
+    const smsLink = document.getElementById('sms-admin-link');
+    waLink.href   = 'https://wa.me/' + _adminFormatted + '?text=' + _adminMsg;
+    smsLink.href  = 'sms:+' + _adminFormatted + '?body=' + _adminMsg;
+    waLink.style.display  = '';
+    smsLink.style.display = '';
   } else {
-    document.getElementById('wa-admin-link').style.display = 'none';
+    const noContact = (e) => { e.preventDefault(); showToast('Admin contact not set in Settings sheet. Add AdminWaNumber row.'); };
+    const waLink  = document.getElementById('wa-admin-link');
+    const smsLink = document.getElementById('sms-admin-link');
+    waLink.href   = '#'; waLink.onclick  = noContact;
+    smsLink.href  = '#'; smsLink.onclick = noContact;
   }
 
   // Active ride banner
@@ -1121,6 +1165,10 @@ async function toggleDriverStatus() {
   }
   const newStatus = goOnline ? 'Online-Available' : 'Offline';
   updateDriverStatusUI(newStatus);
+  if (goOnline) {
+    initAudio();            // Unlock audio context on this user gesture
+    enableNotifications();  // Request notification permission on this user gesture
+  }
   const res = await callAPI('updateDriverStatus', { phone: currentUser.phone, status: newStatus, lat, lng });
   if (res.status === 'success') {
     showToast(goOnline ? 'You are now ONLINE 🟢' : 'You are now OFFLINE');
@@ -1147,9 +1195,13 @@ async function checkForPendingRide() {
   const res = await callAPI('getPendingRide', { phone: currentUser.phone });
   if (res.status === 'success' && res.ride) {
     stopDriverPolling();
-    document.getElementById('pending-ride-id').value           = res.ride.rideId;
-    document.getElementById('pending-ride-pickup').innerText   = res.ride.pickupLandmark  || 'Nearby';
-    document.getElementById('pending-ride-dropoff').innerText  = res.ride.dropoffLandmark || 'TBD';
+    document.getElementById('pending-ride-id').value          = res.ride.rideId;
+    document.getElementById('pending-ride-pickup').innerText  = res.ride.pickupLandmark  || 'Nearby';
+    document.getElementById('pending-ride-dropoff').innerText = res.ride.dropoffLandmark || 'TBD';
+    // Play sound + vibrate + system banner
+    playRideAlert();
+    showSystemNotification('🛵 New Ride Request!',
+      'Pickup: ' + (res.ride.pickupLandmark || 'Nearby') + ' — Open OKAGIA to accept or decline.');
     showModal('modal-new-ride');
   }
 }
@@ -1201,7 +1253,7 @@ async function handlePhotoUpload(event) {
   try {
     const base64   = await compressImage(file, 480, 0.75);
     const mimeType = 'image/jpeg';
-    const res      = await callAPI('updateDriverPhoto', { phone: currentUser.phone, base64, mimeType });
+    const res      = await callAPILarge('updateDriverPhoto', { phone: currentUser.phone, base64, mimeType });
     if (res.status === 'success') {
       document.getElementById('driver-profile-photo').src = res.photoURL;
       showToast('Photo updated! ✅');
@@ -1232,8 +1284,17 @@ function compressImage(file, maxPx, quality) {
 }
 
 function linkTelegram() {
-  window.open('https://t.me/' + TELEGRAM_BOT_NAME + '?start=' + currentUser.phone, '_blank');
-  showToast('Open Telegram and tap START to link your account.');
+  const phone   = currentUser.phone;
+  const tgDeep  = 'tg://resolve?domain=' + TELEGRAM_BOT_NAME + '&start=' + encodeURIComponent(phone);
+  const tgWeb   = 'https://t.me/' + TELEGRAM_BOT_NAME + '?start=' + encodeURIComponent(phone);
+  // Try to open Telegram app directly first
+  const start   = Date.now();
+  window.location.href = tgDeep;
+  // After 1.8s if app didn't open (page still here), fall back to web link
+  setTimeout(() => {
+    if (Date.now() - start < 2500) window.open(tgWeb, '_blank');
+  }, 1800);
+  showToast('Opening Telegram… If nothing opens, please install the Telegram app first.');
 }
 
 function copyDriverLink() {
@@ -1446,6 +1507,68 @@ async function sendBroadcast() {
   if (!msg) return showToast('Type a message first.');
   const res = await callAPI('saveBroadcast', { message: msg });
   if (res.status==='success') { showToast('Broadcast saved ✅'); document.getElementById('broadcast-msg').value=''; }
+}
+
+// ── NOTIFICATION SOUND & ALERTS ─────────────────────
+let audioCtx = null;
+
+// Unlock the audio context on a user gesture (browser autoplay policy)
+function initAudio() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) {}
+}
+
+// Ascending jingle: C5 – E5 – G5 – C6  ("ding ding ding DING")
+// Uses Web Audio API — no file, no hosting needed
+function playRideAlert() {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const now  = audioCtx.currentTime;
+    const beep = (freq, t, dur, vol = 0.45) => {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + t);
+      gain.gain.setValueAtTime(0, now + t);
+      gain.gain.linearRampToValueAtTime(vol, now + t + 0.025);
+      gain.gain.setValueAtTime(vol,  now + t + dur - 0.04);
+      gain.gain.linearRampToValueAtTime(0,   now + t + dur);
+      osc.start(now + t);
+      osc.stop(now  + t + dur + 0.01);
+    };
+    beep(523,  0.00, 0.13);   // C5
+    beep(659,  0.18, 0.13);   // E5
+    beep(784,  0.36, 0.13);   // G5
+    beep(1047, 0.54, 0.38);   // C6 — held
+    // Vibrate phone
+    if (navigator.vibrate) navigator.vibrate([250, 100, 250, 100, 450]);
+  } catch(e) {}
+}
+
+// Request browser notification permission (call on user gesture like Go Online)
+async function enableNotifications() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+// Show a system banner — works even if the app is in a background tab
+function showSystemNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(title, {
+        body,
+        icon:     'https://img.icons8.com/fluency/192/motorcycle.png',
+        tag:      'okagia-ride-alert',
+        renotify: true
+      });
+    } catch(e) {}
+  }
 }
 
 // ── MINI GAME ────────────────────────────────────────
