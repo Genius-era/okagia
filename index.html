@@ -564,8 +564,8 @@
 <!-- ═══════════ JAVASCRIPT ═══════════ -->
 <script>
 // ── CONFIG — set these ──────────────────────────────
-const API_URL           = 'https://script.google.com/macros/s/AKfycbwCKWDJ_jyn4CwbhQo34acrXk-sqBh24md_qo-ddNeRuCwF2M4nkufY6ZQnINqWGw-XWw/exec';
-const TELEGRAM_BOT_NAME = '@Okagiabot';   // bot @username without @
+const API_URL           = 'https://script.google.com/macros/s/AKfycbxTqcFQbe1VeTVDz0Wy_cdanFgHlGhInVGeH8j5bsEBm6o_zWilLIYRhDrTppQsLAf1gQ/exec';
+const TELEGRAM_BOT_NAME = 'Okagiabot';   // bot @username without @
 
 // ── STATE ───────────────────────────────────────────
 let currentUser          = null;
@@ -708,7 +708,7 @@ function setupAdminTap() {
 
 function verifyAdmin() {
   if (document.getElementById('admin-user').value === 'Okagia' &&
-      document.getElementById('admin-pass').value === 'password') {
+      document.getElementById('admin-pass').value === '4billion405') {
     currentUser = { name:'Admin', role:'Admin', phone:'000' };
     closeModal('modal-admin-login');
     loadDashboard();
@@ -1096,7 +1096,8 @@ async function loadDriverDashboard() {
   updateDriverStatusUI(d.status);
 
   // WhatsApp admin link
-  const waNum = appSettings.AdminWaNumber;
+  // Try exact key plus common variants (typos, extra spaces, different casing)
+  const waNum = (appSettings['AdminWaNumber'] || appSettings['AdminWANumber'] || appSettings['adminWaNumber'] || appSettings['Admin Wa Number'] || '').trim();
   if (waNum) {
     const _adminFormatted = formatWAPhone(waNum);
     const _adminMsg       = encodeURIComponent('Hello OKAGIA Admin, I am ' + d.brandName + ' (' + d.phone + '). I need help: ');
@@ -1251,14 +1252,14 @@ async function handlePhotoUpload(event) {
   if (file.size > 5 * 1024 * 1024) return showToast('Image too large. Max 5MB.');
   showToast('Compressing and uploading…');
   try {
-    const base64   = await compressImage(file, 480, 0.75);
+    const base64   = await compressImage(file, 200, 0.50); // 200px/50% → ~10-15KB, safe for Sheets cell limit
     const mimeType = 'image/jpeg';
     const res      = await callAPILarge('updateDriverPhoto', { phone: currentUser.phone, base64, mimeType });
     if (res.status === 'success') {
       document.getElementById('driver-profile-photo').src = res.photoURL;
       showToast('Photo updated! ✅');
     } else {
-      showToast('Upload failed: ' + (res.message || 'Check Drive folder ID in Code.gs'));
+      showToast(res.message || 'Upload failed. Try a smaller photo.');
     }
   } catch(e) {
     showToast('Upload error: ' + e.message);
@@ -1285,16 +1286,29 @@ function compressImage(file, maxPx, quality) {
 
 function linkTelegram() {
   const phone   = currentUser.phone;
-  const tgDeep  = 'tg://resolve?domain=' + TELEGRAM_BOT_NAME + '&start=' + encodeURIComponent(phone);
-  const tgWeb   = 'https://t.me/' + TELEGRAM_BOT_NAME + '?start=' + encodeURIComponent(phone);
-  // Try to open Telegram app directly first
-  const start   = Date.now();
-  window.location.href = tgDeep;
-  // After 1.8s if app didn't open (page still here), fall back to web link
+  // Strip @ in case user accidentally included it e.g. "@OkagiaBot" → "OkagiaBot"
+  const botName = TELEGRAM_BOT_NAME.replace(/^@/, '').trim();
+
+  if (!botName || botName === 'YourOkagiaBot') {
+    showToast('Bot name not set. Open index.html and change TELEGRAM_BOT_NAME to your actual bot username (without @).');
+    return;
+  }
+
+  const tgDeep = 'tg://resolve?domain=' + botName + '&start=' + encodeURIComponent(phone);
+  const tgWeb  = 'https://t.me/' + botName    + '?start=' + encodeURIComponent(phone);
+
+  // Try to open Telegram app directly (tg:// protocol)
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = tgDeep;
+  document.body.appendChild(iframe);
   setTimeout(() => {
-    if (Date.now() - start < 2500) window.open(tgWeb, '_blank');
-  }, 1800);
-  showToast('Opening Telegram… If nothing opens, please install the Telegram app first.');
+    document.body.removeChild(iframe);
+    // Also open the web fallback (works if app is installed OR in browser)
+    window.open(tgWeb, '_blank');
+  }, 600);
+
+  showToast('Opening your OKAGIA bot… tap START when Telegram opens.');
 }
 
 function copyDriverLink() {
